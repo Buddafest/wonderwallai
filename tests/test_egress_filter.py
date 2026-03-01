@@ -69,7 +69,7 @@ class TestAPIKeyRedaction:
 
     def test_shopify_key_redacted(self):
         ef = EgressFilter()
-        text = "Token: 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"
+        text = "Token: shpat_" + "a1b2c3d4" * 4  # Fake token built at runtime
         is_safe, cleaned, violations = ef.scan(text, "")
         assert "[REDACTED]" in cleaned
 
