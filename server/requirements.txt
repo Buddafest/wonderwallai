@@ -1,12 +1,12 @@
-# WonderwallAi API Server Dependencies
-fastapi>=0.109.0,<1.0
-uvicorn[standard]>=0.27.0,<1.0
-python-multipart>=0.0.9,<1.0
-sqlalchemy>=2.0.25,<3.0
-aiosqlite>=0.20.0,<1.0
-asyncpg>=0.29.0,<1.0
-greenlet>=3.0.0,<4.0
-pydantic>=2.6.0,<3.0
-pydantic-settings>=2.2.0,<3.0
-python-dotenv>=1.0.1,<2.0
-stripe>=8.0.0,<10.0
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+stripe>=8.0.0
+pydantic>=2.0.0
+python-multipart>=0.0.9
+httpx>=0.27.0
+numpy>=1.24.0
+groq>=0.4.2
+sentence-transformers>=2.7.0
+torch>=2.2.0
+filetype>=1.2.0
+Pillow>=10.0.0
