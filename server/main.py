@@ -8,7 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from server.config import get_settings
 from server.db.engine import init_db, close_db
 from server.middleware import SecurityHeadersMiddleware
-from server.api import scan, admin, billing
+from server.instance_cache import warm_shared_model
+from server.api import scan, admin, billing, canary, config, files, health, usage
 from server.helpers import set_billing_service
 from server.services.billing_service import BillingService
 
@@ -18,9 +19,11 @@ logger = logging.getLogger("wonderwallai.server")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
     # Initialize database (creates tables + runs migrations)
     await init_db()
+
+    # Pre-warm the shared embedding model
+    warm_shared_model()
 
     # Initialize Stripe billing service
     billing_svc = BillingService()
@@ -57,9 +60,20 @@ def create_app() -> FastAPI:
     # Security headers
     app.add_middleware(SecurityHeadersMiddleware)
 
-    # Routers — no prefix here, each router defines its own prefix already
+    # Routers — each router defines its own prefix already
     app.include_router(scan.router)
     app.include_router(admin.router)
+    app.include_router(billing.router)
+    app.include_router(canary.router)
+    app.include_router(config.router)
+    app.include_router(files.router)
+    app.include_router(health.router)
+    app.include_router(usage.router)
+
+    return app
+
+
+app = create_app()
     app.include_router(billing.router)
 
     @app.get("/health", tags=["health"])
