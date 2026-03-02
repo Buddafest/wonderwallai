@@ -480,6 +480,55 @@
         .price-features li::before { content: "\2713"; color: var(--green); font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
         .price-card .btn { width: 100%; }
 
+        /* ---- EARLY BIRD ---- */
+        .early-bird-banner {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(124, 58, 237, 0.08));
+            border: 1px solid var(--green);
+            border-radius: 16px;
+            padding: 20px 28px;
+            margin-bottom: 32px;
+        }
+        .early-bird-inner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .early-bird-icon { font-size: 2rem; }
+        .early-bird-text { text-align: left; }
+        .early-bird-text strong { color: var(--green); font-size: 1.1rem; display: block; }
+        .early-bird-text span { color: var(--text-secondary); font-size: 0.9rem; }
+        .early-bird-counter { text-align: center; min-width: 80px; }
+        .early-bird-count {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--green);
+            display: block;
+            line-height: 1;
+        }
+        .early-bird-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+        .price-original {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            display: none;
+        }
+        .price-discounted { display: none; }
+        .eb-badge {
+            position: absolute;
+            top: -13px;
+            right: 16px;
+            background: var(--green);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: none;
+        }
+        .price-card.popular .eb-badge { right: auto; left: 16px; }
+
         /* ---- FAQ ---- */
         .faq-item {
             border-bottom: 1px solid var(--border);
@@ -986,6 +1035,21 @@ wall = Wonderwall(
         <h2 class="section-title fade-in">Simple, Transparent Pricing</h2>
         <p class="section-subtitle fade-in">Open-source SDK is free forever. Hosted API scales with you.</p>
 
+        <!-- Early Bird Banner (hidden by default — shown via JS when promotion is active) -->
+        <div id="early-bird-banner" class="early-bird-banner fade-in" style="display: none;">
+            <div class="early-bird-inner">
+                <span class="early-bird-icon">&#127820;</span>
+                <div class="early-bird-text">
+                    <strong>Early Bird Special: 50% off forever</strong>
+                    <span>Lock in half-price for life. Limited to the first 300 paying customers.</span>
+                </div>
+                <div class="early-bird-counter">
+                    <span id="early-bird-remaining" class="early-bird-count">---</span>
+                    <span class="early-bird-label">spots left</span>
+                </div>
+            </div>
+        </div>
+
         <div class="pricing-grid fade-in">
             <div class="price-card">
                 <h3>Free</h3>
@@ -999,9 +1063,11 @@ wall = Wonderwall(
                 </ul>
                 <a href="https://github.com/Buddafest/wonderwallai" class="btn btn-outline">Get Started Free</a>
             </div>
-            <div class="price-card">
+            <div class="price-card" data-plan="starter">
+                <span class="eb-badge">50% OFF</span>
                 <h3>Starter</h3>
-                <div class="price-amount">$29<span>/mo</span></div>
+                <div class="price-original">$29/mo</div>
+                <div class="price-amount"><span class="price-full">$29</span><span class="price-discounted">$14.50</span><span>/mo</span></div>
                 <div class="price-desc">For growing applications</div>
                 <ul class="price-features">
                     <li>50,000 scans/month</li>
@@ -1011,10 +1077,12 @@ wall = Wonderwall(
                 </ul>
                 <a href="mailto:hello@wonderwallai.com?subject=Starter Plan" class="btn btn-outline">Get Started</a>
             </div>
-            <div class="price-card popular">
+            <div class="price-card popular" data-plan="pro">
+                <span class="eb-badge">50% OFF</span>
                 <div class="popular-badge">Most Popular</div>
                 <h3>Pro</h3>
-                <div class="price-amount">$99<span>/mo</span></div>
+                <div class="price-original">$99/mo</div>
+                <div class="price-amount"><span class="price-full">$99</span><span class="price-discounted">$49.50</span><span>/mo</span></div>
                 <div class="price-desc">For production workloads</div>
                 <ul class="price-features">
                     <li>500,000 scans/month</li>
@@ -1024,9 +1092,11 @@ wall = Wonderwall(
                 </ul>
                 <a href="mailto:hello@wonderwallai.com?subject=Pro Plan" class="btn btn-primary">Get Started</a>
             </div>
-            <div class="price-card">
+            <div class="price-card" data-plan="business">
+                <span class="eb-badge">50% OFF</span>
                 <h3>Business</h3>
-                <div class="price-amount">$299<span>/mo</span></div>
+                <div class="price-original">$299/mo</div>
+                <div class="price-amount"><span class="price-full">$299</span><span class="price-discounted">$149.50</span><span>/mo</span></div>
                 <div class="price-desc">For high-volume apps</div>
                 <ul class="price-features">
                     <li>2,000,000 scans/month</li>
@@ -1145,6 +1215,41 @@ document.querySelectorAll('.faq-question').forEach(btn => {
         if (!wasOpen) item.classList.add('open');
     });
 });
+
+// Early bird pricing (progressive enhancement — full prices shown if API is unreachable)
+(async function() {
+    try {
+        // Try API first; fall back to showing early bird statically if no API available
+        let data = null;
+        try {
+            const res = await fetch('https://api.wonderwallai.com/v1/billing/early-bird', { signal: AbortSignal.timeout(3000) });
+            if (res.ok) data = await res.json();
+        } catch (_) { /* API not deployed yet — use static fallback below */ }
+
+        // Static fallback: show early bird until API is live (remove this block once deployed)
+        if (!data) {
+            data = { active: true, remaining_spots: 300, discount_percent: 50 };
+        }
+
+        if (!data.active) return;
+
+        // Show banner + counter
+        const banner = document.getElementById('early-bird-banner');
+        if (banner) banner.style.display = '';
+        const counter = document.getElementById('early-bird-remaining');
+        if (counter) counter.textContent = data.remaining_spots;
+
+        // Toggle discounted prices on paid cards
+        document.querySelectorAll('.price-card[data-plan]').forEach(card => {
+            card.querySelector('.eb-badge').style.display = 'block';
+            card.querySelector('.price-original').style.display = 'block';
+            card.querySelector('.price-full').style.display = 'none';
+            card.querySelector('.price-discounted').style.display = 'inline';
+        });
+    } catch (e) {
+        // Silently fail — users see full prices
+    }
+})();
 </script>
 
 </body>

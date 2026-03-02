@@ -40,6 +40,10 @@ class ServerSettings(BaseSettings):
     stripe_business_flat_price_id: str = Field(default="", alias="STRIPE_BUSINESS_FLAT_PRICE_ID")
     stripe_business_overage_price_id: str = Field(default="", alias="STRIPE_BUSINESS_OVERAGE_PRICE_ID")
 
+    # --- Early Bird Promotion ---
+    early_bird_coupon_id: str = Field(default="", alias="EARLY_BIRD_COUPON_ID")
+    early_bird_max_redemptions: int = Field(default=300, alias="EARLY_BIRD_MAX_REDEMPTIONS")
+
     # --- Production validation ---
     @model_validator(mode="after")
     def validate_production(self) -> "ServerSettings":

@@ -47,6 +47,7 @@ class CreateKeyResponse(BaseModel):
     stripe_customer_id: Optional[str] = None
     stripe_subscription_id: Optional[str] = None
     client_secret: Optional[str] = None  # For frontend payment confirmation
+    has_early_bird: bool = False
 
 
 class KeyInfo(BaseModel):
@@ -93,6 +94,8 @@ async def create_api_key(req: CreateKeyRequest, request: Request):
         stripe_subscription_id = None
         client_secret = None
 
+        has_early_bird = False
+
         if req.plan != "free":
             from server.helpers import _billing_service
 
@@ -101,16 +104,32 @@ async def create_api_key(req: CreateKeyRequest, request: Request):
                     name=req.name, email=req.owner_email, api_key_id=api_key_row.id
                 )
                 if stripe_customer_id:
+                    # Check early bird eligibility
+                    coupon_id = None
+                    if await _billing_service.is_early_bird_available():
+                        settings = get_settings()
+                        coupon_id = settings.early_bird_coupon_id
+
                     sub_result = await _billing_service.create_subscription(
-                        customer_id=stripe_customer_id, plan=req.plan
+                        customer_id=stripe_customer_id, plan=req.plan, coupon_id=coupon_id
                     )
+                    # Race condition fallback: retry without coupon
+                    if not sub_result and coupon_id:
+                        logger.info("Early bird coupon rejected — retrying at full price")
+                        coupon_id = None
+                        sub_result = await _billing_service.create_subscription(
+                            customer_id=stripe_customer_id, plan=req.plan
+                        )
                     if sub_result:
                         stripe_subscription_id = sub_result["subscription_id"]
                         client_secret = sub_result.get("client_secret")
+                        if coupon_id:
+                            has_early_bird = True
 
                 api_key_row.stripe_customer_id = stripe_customer_id
                 api_key_row.stripe_subscription_id = stripe_subscription_id
                 api_key_row.billing_status = "active" if stripe_subscription_id else "none"
+                api_key_row.has_early_bird = has_early_bird
 
     logger.info(f"Created API key {key_prefix}... for {req.owner_email} ({req.plan})")
 
@@ -123,6 +142,7 @@ async def create_api_key(req: CreateKeyRequest, request: Request):
         stripe_customer_id=stripe_customer_id,
         stripe_subscription_id=stripe_subscription_id,
         client_secret=client_secret,
+        has_early_bird=has_early_bird,
     )
 
 

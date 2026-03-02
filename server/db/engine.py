@@ -61,6 +61,7 @@ async def _migrate_add_missing_columns() -> None:
         ("api_keys", "stripe_customer_id", "VARCHAR(255)"),
         ("api_keys", "stripe_subscription_id", "VARCHAR(255)"),
         ("api_keys", "billing_status", "VARCHAR(32) DEFAULT 'none'"),
+        ("api_keys", "has_early_bird", "BOOLEAN DEFAULT 0"),
     ]
 
     async with _engine.begin() as conn:

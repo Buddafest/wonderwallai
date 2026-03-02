@@ -130,10 +130,11 @@ class BillingService:
     # ------------------------------------------------------------------
 
     async def create_subscription(
-        self, customer_id: str, plan: str
+        self, customer_id: str, plan: str, coupon_id: Optional[str] = None
     ) -> Optional[dict]:
         """
         Create a subscription with flat fee + metered overage price.
+        Optionally applies a coupon (e.g. early bird discount).
         Returns dict with subscription_id, client_secret, status — or None.
         """
         if not self.configured:
@@ -155,16 +156,20 @@ class BillingService:
         if overage_price:
             items.append({"price": overage_price})
 
+        create_kwargs = {
+            "customer": customer_id,
+            "items": items,
+            "payment_behavior": "default_incomplete",
+            "expand": ["latest_invoice.payment_intent"],
+        }
+        if coupon_id:
+            create_kwargs["coupon"] = coupon_id
+
         loop = asyncio.get_running_loop()
         try:
             subscription = await loop.run_in_executor(
                 None,
-                lambda: stripe.Subscription.create(
-                    customer=customer_id,
-                    items=items,
-                    payment_behavior="default_incomplete",
-                    expand=["latest_invoice.payment_intent"],
-                ),
+                lambda: stripe.Subscription.create(**create_kwargs),
             )
             logger.info(f"Subscription created: {subscription.id} (plan={plan})")
 
@@ -331,3 +336,34 @@ class BillingService:
     def get_included_scans(self, plan: str) -> int:
         """Return the number of scans included in a plan."""
         return self.get_plan_config(plan).get("included_scans", 1_000)
+
+    # ------------------------------------------------------------------
+    # Early bird promotion
+    # ------------------------------------------------------------------
+
+    async def get_early_bird_count(self) -> int:
+        """Count how many API keys have redeemed the early bird discount."""
+        from sqlalchemy import func, select
+
+        from server.db.engine import get_db
+        from server.db.models import ApiKey
+
+        try:
+            async with get_db() as db:
+                result = await db.execute(
+                    select(func.count(ApiKey.id)).where(
+                        ApiKey.has_early_bird == True  # noqa: E712
+                    )
+                )
+                return result.scalar() or 0
+        except Exception as e:
+            logger.warning(f"Failed to count early bird redemptions: {e}")
+            return 0
+
+    async def is_early_bird_available(self) -> bool:
+        """Check if early bird promotion slots remain."""
+        settings = get_settings()
+        if not settings.early_bird_coupon_id:
+            return False
+        count = await self.get_early_bird_count()
+        return count < settings.early_bird_max_redemptions

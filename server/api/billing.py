@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import func, select
 
 from server.auth import get_current_api_key
+from server.config import get_settings
 from server.db.engine import get_db
 from server.db.models import ApiKey, UsageRecord
 from server.helpers import _billing_service
@@ -78,9 +79,21 @@ async def upgrade_plan(
             if not customer_id:
                 raise HTTPException(status_code=502, detail="Failed to create Stripe customer")
 
+        # Check early bird eligibility
+        coupon_id = None
+        if await _billing_service.is_early_bird_available():
+            coupon_id = get_settings().early_bird_coupon_id
+
         sub_result = await _billing_service.create_subscription(
-            customer_id=customer_id, plan=req.new_plan
+            customer_id=customer_id, plan=req.new_plan, coupon_id=coupon_id
         )
+        # Race condition fallback: if coupon was rejected, retry without it
+        if not sub_result and coupon_id:
+            logger.info("Early bird coupon rejected — retrying at full price")
+            coupon_id = None
+            sub_result = await _billing_service.create_subscription(
+                customer_id=customer_id, plan=req.new_plan
+            )
         if not sub_result:
             raise HTTPException(status_code=502, detail="Failed to create subscription")
 
@@ -96,12 +109,15 @@ async def upgrade_plan(
             key.stripe_customer_id = customer_id
             key.stripe_subscription_id = sub_result["subscription_id"]
             key.billing_status = "active"
+            if coupon_id:
+                key.has_early_bird = True
 
         return {
             "plan": req.new_plan,
             "subscription_id": sub_result["subscription_id"],
             "client_secret": sub_result.get("client_secret"),
             "status": sub_result["status"],
+            "early_bird": bool(coupon_id),
         }
 
     # Existing subscription — change plan
@@ -192,3 +208,36 @@ async def stripe_webhook(request: Request):
                 )
 
     return {"status": "ok"}
+
+
+@router.get("/early-bird")
+async def early_bird_status():
+    """Public endpoint (no auth): returns early bird promotion status for the landing page."""
+    settings = get_settings()
+
+    if not settings.early_bird_coupon_id:
+        return {
+            "active": False,
+            "total_spots": 0,
+            "remaining_spots": 0,
+            "discount_percent": 0,
+        }
+
+    if not _billing_service:
+        # Billing not initialised yet — return defaults
+        return {
+            "active": True,
+            "total_spots": settings.early_bird_max_redemptions,
+            "remaining_spots": settings.early_bird_max_redemptions,
+            "discount_percent": 50,
+        }
+
+    count = await _billing_service.get_early_bird_count()
+    remaining = max(0, settings.early_bird_max_redemptions - count)
+
+    return {
+        "active": remaining > 0,
+        "total_spots": settings.early_bird_max_redemptions,
+        "remaining_spots": remaining,
+        "discount_percent": 50,
+    }
