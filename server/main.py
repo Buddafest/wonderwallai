@@ -57,27 +57,4 @@ def create_app() -> FastAPI:
     return app
 
 
-app = create_app()    # Routers — each router defines its own prefix already
-    app.include_router(scan.router)
-    app.include_router(admin.router)
-    app.include_router(billing.router)
-    app.include_router(canary.router)
-    app.include_router(config.router)
-    app.include_router(files.router)
-    app.include_router(health.router)
-    app.include_router(usage.router)
-
-    return app
-
-
-app = create_app()
-    app.include_router(billing.router)
-
-    @app.get("/health", tags=["health"])
-    async def health():
-        return {"status": "ok", "version": "1.0.0"}
-
-    return app
-
-
 app = create_app()
