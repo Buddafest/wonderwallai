@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from server.config import get_settings
 from server.db.engine import init_db, close_db
-from server.middleware import RateLimitMiddleware
+from server.middleware import SecurityHeadersMiddleware
 from server.api import scan, admin, billing
 from server.helpers import set_billing_service
 from server.services.billing_service import BillingService
@@ -19,8 +19,6 @@ logger = logging.getLogger("wonderwallai.server")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    settings = get_settings()
-
     # Initialize database (creates tables + runs migrations)
     await init_db()
 
@@ -56,13 +54,13 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Rate limiting middleware
-    app.add_middleware(RateLimitMiddleware)
+    # Security headers
+    app.add_middleware(SecurityHeadersMiddleware)
 
-    # Routers
-    app.include_router(scan.router, prefix="/v1/scan", tags=["scan"])
-    app.include_router(admin.router, prefix="/v1/admin", tags=["admin"])
-    app.include_router(billing.router, prefix="/v1/billing", tags=["billing"])
+    # Routers — no prefix here, each router defines its own prefix already
+    app.include_router(scan.router)
+    app.include_router(admin.router)
+    app.include_router(billing.router)
 
     @app.get("/health", tags=["health"])
     async def health():
