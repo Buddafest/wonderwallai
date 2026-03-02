@@ -1,66 +1,77 @@
-import os
+"""WonderwallAi hosted API server."""
 import logging
 from contextlib import asynccontextmanager
-from typing import Optional
-import stripe
-from fastapi import FastAPI, HTTPException, Header, Request, Depends
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from wonderwallai.client import Wonderwall
+
+from server.config import get_settings
+from server.db.engine import init_db, close_db
+from server.middleware import RateLimitMiddleware
+from server.api import scan, admin, billing
+from server.helpers import set_billing_service
+from server.services.billing_service import BillingService
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("wonderwallai.server")
 
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "")
-STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
-PRICE_IDS = {
-    "starter": os.environ.get("STRIPE_PRICE_STARTER", ""),
-    "pro": os.environ.get("STRIPE_PRICE_PRO", ""),
-    "business": os.environ.get("STRIPE_PRICE_BUSINESS", ""),
-}
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://wonderwallai-production.up.railway.app")
-firewall = None
 
 @asynccontextmanager
-async def lifespan(app):
-    global firewall
-    firewall = Wonderwall(sentinel_api_key=os.environ.get("GROQ_API_KEY", ""), fail_open=True)
+async def lifespan(app: FastAPI):
+    # Startup
+    settings = get_settings()
+
+    # Initialize database (creates tables + runs migrations)
+    await init_db()
+
+    # Initialize Stripe billing service
+    billing_svc = BillingService()
+    set_billing_service(billing_svc)
+
+    logger.info("WonderwallAi server started")
     yield
 
-app = FastAPI(title="WonderwallAi API", version="1.0.0", lifespan=lifespan)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+    # Shutdown
+    await close_db()
+    logger.info("WonderwallAi server stopped")
 
-def get_api_key(authorization: str = Header(...)):
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid authorization header")
-    return authorization.removeprefix("Bearer ").strip()
 
-class ScanInboundRequest(BaseModel):
-    message: str
-    session_id: Optional[str] = None
+def create_app() -> FastAPI:
+    settings = get_settings()
 
-class ScanOutboundRequest(BaseModel):
-    text: str
-    canary_token: Optional[str] = ""
+    app = FastAPI(
+        title="WonderwallAi API",
+        version="1.0.0",
+        description="AI firewall for LLM applications",
+        lifespan=lifespan,
+    )
 
-class CheckoutRequest(BaseModel):
-    plan: str
-    email: Optional[str] = None
-    apply_early_bird: bool = True
+    # CORS
+    origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins if origins else ["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-class CanaryRequest(BaseModel):
-    session_id: str
+    # Rate limiting middleware
+    app.add_middleware(RateLimitMiddleware)
 
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
+    # Routers
+    app.include_router(scan.router, prefix="/v1/scan", tags=["scan"])
+    app.include_router(admin.router, prefix="/v1/admin", tags=["admin"])
+    app.include_router(billing.router, prefix="/v1/billing", tags=["billing"])
 
-@app.post("/v1/scan/inbound")
-async def scan_inbound(body: ScanInboundRequest, api_key: str = Depends(get_api_key)):
-    verdict = await firewall.scan_inbound(body.message)
-    return {"allowed": verdict.allowed, "action": verdict.action, "message": verdict.message, "blocked_by": verdict.blocked_by, "violations": verdict.violations, "scores": verdict.scores}
+    @app.get("/health", tags=["health"])
+    async def health():
+        return {"status": "ok", "version": "1.0.0"}
 
-@app.post("/v1/scan/outbound")
+    return app
+
+
+app = create_app()@app.post("/v1/scan/outbound")
 async def scan_outbound(body: ScanOutboundRequest, api_key: str = Depends(get_api_key)):
     verdict = await firewall.scan_outbound(body.text, body.canary_token or "")
     return {"allowed": verdict.allowed, "action": verdict.action, "message": verdict.message, "violations": verdict.violations}
