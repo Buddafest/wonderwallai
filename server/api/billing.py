@@ -190,7 +190,10 @@ async def stripe_webhook(request: Request):
                     )
 
     elif event_type == "customer.subscription.deleted":
-        subscription_id = event["data"]["object"]["id"]
+        subscription_id = event["data"]["object"].get("id")
+        if not subscription_id:
+            logger.warning(f"Webhook {event_type}: no subscription ID in event")
+            return {"status": "ok"}
         async with get_db() as db:
             result = await db.execute(
                 select(ApiKey).where(

@@ -1,6 +1,7 @@
 """Scan endpoints — the core product."""
 
 import time
+import unicodedata
 
 from fastapi import APIRouter, Depends
 
@@ -12,6 +13,15 @@ from server.schemas.requests import ScanInboundRequest, ScanOutboundRequest
 from server.schemas.responses import VerdictResponse
 
 router = APIRouter(prefix="/v1/scan", tags=["Scan"])
+
+
+def _sanitize_input(text: str) -> str:
+    """Normalize Unicode and strip control characters (from Jerry's hardening)."""
+    text = unicodedata.normalize("NFKC", text)
+    text = "".join(
+        c for c in text if unicodedata.category(c)[0] != "C" or c in "\n\t"
+    )
+    return text.strip()
 
 
 @router.post("/inbound", response_model=VerdictResponse)
@@ -28,7 +38,8 @@ async def scan_inbound(
     start = time.perf_counter()
 
     instance = await get_wonderwall_for_key(api_key)
-    verdict = await instance.scan_inbound(req.message)
+    sanitized = _sanitize_input(req.message)
+    verdict = await instance.scan_inbound(sanitized)
 
     latency = (time.perf_counter() - start) * 1000
 
@@ -66,7 +77,8 @@ async def scan_outbound(
     start = time.perf_counter()
 
     instance = await get_wonderwall_for_key(api_key)
-    verdict = await instance.scan_outbound(req.text, req.canary_token)
+    sanitized = _sanitize_input(req.text)
+    verdict = await instance.scan_outbound(sanitized, req.canary_token)
 
     latency = (time.perf_counter() - start) * 1000
 

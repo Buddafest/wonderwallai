@@ -1,5 +1,6 @@
 """Admin endpoints — create and manage API keys."""
 
+import hmac
 import logging
 import secrets
 from typing import Optional
@@ -22,10 +23,10 @@ ADMIN_HEADER = "X-Admin-API-Key"
 
 
 async def _verify_admin(request: Request) -> None:
-    """Verify the admin API key from request headers."""
+    """Verify the admin API key from request headers (timing-safe)."""
     settings = get_settings()
     api_key = request.headers.get(ADMIN_HEADER, "")
-    if api_key != settings.admin_api_key:
+    if not hmac.compare_digest(api_key, settings.admin_api_key):
         raise HTTPException(status_code=401, detail="Invalid admin API key")
 
 
@@ -168,3 +169,39 @@ async def list_api_keys(request: Request):
         )
         for k in keys
     ]
+
+
+@router.patch("/keys/{key_prefix}/deactivate")
+async def deactivate_api_key(key_prefix: str, request: Request):
+    """Deactivate a compromised or cancelled API key."""
+    await _verify_admin(request)
+
+    async with get_db() as db:
+        result = await db.execute(
+            select(ApiKey).where(ApiKey.key_prefix == key_prefix)
+        )
+        key = result.scalar_one_or_none()
+        if not key:
+            raise HTTPException(status_code=404, detail="API key not found")
+        key.is_active = False
+        logger.info(f"Deactivated API key {key_prefix}")
+
+    return {"deactivated": key_prefix, "is_active": False}
+
+
+@router.patch("/keys/{key_prefix}/reactivate")
+async def reactivate_api_key(key_prefix: str, request: Request):
+    """Reactivate a previously deactivated API key."""
+    await _verify_admin(request)
+
+    async with get_db() as db:
+        result = await db.execute(
+            select(ApiKey).where(ApiKey.key_prefix == key_prefix)
+        )
+        key = result.scalar_one_or_none()
+        if not key:
+            raise HTTPException(status_code=404, detail="API key not found")
+        key.is_active = True
+        logger.info(f"Reactivated API key {key_prefix}")
+
+    return {"reactivated": key_prefix, "is_active": True}

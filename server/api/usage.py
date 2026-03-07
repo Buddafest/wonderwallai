@@ -1,6 +1,6 @@
 """Usage stats endpoint."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/v1/usage", tags=["Usage"])
 @router.get("/", response_model=UsageResponse)
 async def get_usage(api_key: ApiKey = Depends(get_current_api_key)):
     """Get usage stats for the current billing period (calendar month)."""
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     period_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     # Last day of current month
     if now.month == 12:

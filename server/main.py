@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from server.config import get_settings
 from server.db.engine import init_db, close_db
-from server.middleware import SecurityHeadersMiddleware
+from server.middleware import RequestLoggingMiddleware, SecurityHeadersMiddleware
 from server.instance_cache import warm_shared_model
 from server.api import scan, admin, billing, canary, config, files, health, usage
 from server.helpers import set_billing_service
@@ -46,6 +46,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.add_middleware(SecurityHeadersMiddleware)
+    app.add_middleware(RequestLoggingMiddleware)
     app.include_router(scan.router)
     app.include_router(admin.router)
     app.include_router(billing.router)

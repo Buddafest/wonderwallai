@@ -50,6 +50,11 @@ class ServerSettings(BaseSettings):
         if self.environment == "production":
             if self.admin_api_key in ("", "dev-admin-key"):
                 raise ValueError("ADMIN_API_KEY must be set in production")
+            if not self.stripe_secret_key:
+                import logging
+                logging.getLogger("wonderwallai.server").warning(
+                    "STRIPE_SECRET_KEY not set in production — billing will be disabled"
+                )
         return self
 
     @property

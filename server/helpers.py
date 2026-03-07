@@ -132,6 +132,10 @@ async def check_scan_limit(api_key: ApiKey) -> None:
     if plan != "free" and scan_count > included_scans and _billing_service:
         subscription_id = api_key.stripe_subscription_id
         if subscription_id:
-            asyncio.create_task(
+            task = asyncio.create_task(
                 _billing_service.report_overage(subscription_id, plan, count=1)
+            )
+            task.add_done_callback(
+                lambda t: logger.error(f"Overage report failed: {t.exception()}")
+                if t.exception() else None
             )
