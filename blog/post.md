@@ -138,23 +138,35 @@ verdict = await wall.scan_outbound(response_text, canary_token)
 
 ### As a Hosted API
 
+Don't want to manage the embedding model and dependencies yourself? WonderwallAi is also available as a hosted REST API:
+
 ```bash
-curl -X POST https://api.wonderwallai.com/v1/scan/inbound \
+curl -X POST https://wonderwallai-production.up.railway.app/v1/scan/inbound \
   -H "Authorization: Bearer ww_live_abc123..." \
   -H "Content-Type: application/json" \
   -d '{"message": "How do I track my order?"}'
 ```
 
-The hosted API includes per-customer configuration, usage tracking, and rate limiting — all managed through API keys.
+The hosted API includes:
+- Per-customer firewall configuration (topics, thresholds, sentinel toggle)
+- Usage tracking and billing period stats
+- Rate limiting by plan tier
+- Canary token generation and management
+- File sanitization endpoint
+
+All managed through API keys with full isolation between customers.
+
+**Founding member pricing:** The first 300 customers get 50% off forever — no tricks, no time limits, locked in for life.
 
 ## What's Next
 
 - **Dashboard** — A web UI for monitoring blocks, viewing attack patterns, and tuning thresholds
 - **More LLM providers** — OpenAI and Anthropic support for the Sentinel classifier (currently Groq only)
-- **PyPI publication** — Currently install from GitHub, PyPI coming soon
 - **Multi-tenant management** — Manage multiple bot configurations from a single account
+- **Pinecone-backed semantic router** — Vector database routing for enterprise deployments with per-merchant topic isolation
 
 The code is open source: [github.com/Buddafest/wonderwallai](https://github.com/Buddafest/wonderwallai)
+Install from PyPI: `pip install wonderwallai`
 
 If you're building an LLM application and haven't thought about what happens when users try to jailbreak it — you should. It will happen faster than you think.
 
