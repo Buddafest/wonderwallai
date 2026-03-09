@@ -1,9 +1,11 @@
 """Billing endpoints — subscription info, plan upgrades, Stripe webhooks."""
 
 import logging
+import os
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import RedirectResponse
 from sqlalchemy import func, select
 
 from server.auth import get_current_api_key
@@ -19,6 +21,54 @@ from server.services.billing_service import PLAN_CONFIG
 logger = logging.getLogger("wonderwallai.server.billing")
 
 router = APIRouter(prefix="/v1/billing", tags=["Billing"])
+
+
+@router.get("/checkout")
+async def checkout(plan: str = "starter"):
+    """Create a Stripe Checkout Session and redirect to Stripe-hosted payment page.
+
+    Used by the landing page pricing buttons. No auth required — Stripe handles
+    everything on their hosted page.
+
+    Query params:
+        plan: starter | pro | business
+    """
+    try:
+        import stripe as stripe_mod
+    except ImportError:
+        raise HTTPException(status_code=503, detail="Stripe not available")
+
+    api_key = os.getenv("STRIPE_SECRET_KEY", "")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="Stripe not configured")
+
+    stripe_mod.api_key = api_key
+
+    config = PLAN_CONFIG.get(plan)
+    if not config or plan == "free":
+        raise HTTPException(status_code=400, detail=f"Invalid plan: {plan}")
+
+    flat_price = config.get("flat_price_id")
+    overage_price = config.get("overage_price_id")
+    if not flat_price:
+        raise HTTPException(status_code=503, detail=f"Price not configured for plan: {plan}")
+
+    line_items = [{"price": flat_price, "quantity": 1}]
+    if overage_price:
+        line_items.append({"price": overage_price})
+
+    try:
+        session = stripe_mod.checkout.Session.create(
+            mode="subscription",
+            line_items=line_items,
+            success_url="https://buddafest.github.io/wonderwallai/?checkout=success",
+            cancel_url="https://buddafest.github.io/wonderwallai/#pricing",
+            allow_promotion_codes=True,
+        )
+        return RedirectResponse(session.url, status_code=303)
+    except Exception as e:
+        logger.error(f"Failed to create Checkout Session: {e}")
+        raise HTTPException(status_code=502, detail="Failed to create checkout session")
 
 
 @router.get("/subscription", response_model=BillingSubscriptionResponse)
