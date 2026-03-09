@@ -3,6 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -37,20 +38,30 @@ async def init_db() -> None:
     )
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    
+    # Run migrations after base tables are created
     await _migrate_add_missing_columns()
     logger.info(f"Database initialized ({url.split('://')[0]})")
 
 
 async def _migrate_add_missing_columns() -> None:
-    from sqlalchemy import text
+    """
+    Safely adds missing columns to the api_keys table.
+    Uses tuples to maintain (table, column, type) order.
+    """
+    if _engine is None:
+        return
+
     migrations = [
         ("api_keys", "stripe_customer_id", "VARCHAR(255)"),
         ("api_keys", "stripe_subscription_id", "VARCHAR(255)"),
         ("api_keys", "billing_status", "VARCHAR(32) DEFAULT 'none'"),
         ("api_keys", "has_early_bird", "BOOLEAN DEFAULT FALSE"),
     ]
+
     for table, column, col_type in migrations:
         try:
+            # Each migration runs in its own transaction to prevent total failure
             async with _engine.begin() as conn:
                 await conn.execute(
                     text(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}")
@@ -58,6 +69,7 @@ async def _migrate_add_missing_columns() -> None:
                 logger.info(f"Migration: added {table}.{column}")
         except Exception as e:
             err = str(e).lower()
+            # If the column exists, we skip and continue
             if "duplicate column" in err or "already exists" in err:
                 pass
             else:
