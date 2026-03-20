@@ -78,6 +78,27 @@
         }
         .logo { font-size: 1.2rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
         .logo span { color: var(--accent-hover); }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .skint-badge {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .skint-badge:hover {
+            color: #d4a040;
+            border-color: #d4a040;
+        }
         .nav-links { display: flex; gap: 32px; align-items: center; }
         .nav-links a { color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; }
         .nav-links a:hover { color: var(--text); }
@@ -649,7 +670,10 @@
 <!-- NAV -->
 <nav>
     <div class="container">
-        <div class="logo">Wonderwall<span>Ai</span></div>
+        <div class="nav-brand">
+            <div class="logo">Wonderwall<span>Ai</span></div>
+            <a href="https://skintlabs.ai" class="skint-badge" target="_blank" rel="noopener">by Skint Labs</a>
+        </div>
         <div class="nav-links">
             <a href="#how-it-works">How It Works</a>
             <a href="#integrations">Integrations</a>
