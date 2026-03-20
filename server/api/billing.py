@@ -61,8 +61,8 @@ async def checkout(plan: str = "starter"):
         session = stripe_mod.checkout.Session.create(
             mode="subscription",
             line_items=line_items,
-            success_url="https://buddafest.github.io/wonderwallai/?checkout=success",
-            cancel_url="https://buddafest.github.io/wonderwallai/#pricing",
+            success_url="https://wonderwallai.skintlabs.ai/?checkout=success",
+            cancel_url="https://wonderwallai.skintlabs.ai/#pricing",
             allow_promotion_codes=True,
         )
         return RedirectResponse(session.url, status_code=303)
