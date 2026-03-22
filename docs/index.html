@@ -91,7 +91,7 @@
             letter-spacing: 0.08em;
             padding: 4px 10px;
             border: 1px solid var(--border);
-            border-radius: 100px;
+            border-radius: 4px;
             transition: all 0.2s;
             text-decoration: none;
         }
@@ -164,16 +164,19 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 16px;
-            border-radius: 100px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            font-size: 0.8rem;
-            font-weight: 500;
+            padding: 0 0 0 12px;
+            border-radius: 0;
+            background: none;
+            border: none;
+            border-left: 3px solid var(--green);
+            font-size: 0.75rem;
+            font-weight: 600;
             color: var(--text-secondary);
             margin-bottom: 28px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
-        .hero-badge .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; }
+        .hero-badge .dot { display: none; }
         .hero h1 {
             font-size: 4rem;
             font-weight: 900;
@@ -210,7 +213,7 @@
 
         /* ---- STATS BAR ---- */
         .stats {
-            padding: 48px 0;
+            padding: 0;
             border-top: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
             background: var(--bg-subtle);
@@ -218,19 +221,32 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 32px;
-            text-align: center;
+            gap: 0;
         }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
+        .stats-grid > div {
+            padding: 36px 24px;
+            border-right: 1px solid var(--border);
+            position: relative;
+        }
+        .stats-grid > div:last-child { border-right: none; }
+        .stats-grid > div::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
             background: var(--gradient-text);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
-        .stat-label { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; font-weight: 500; }
+        .stats-grid > div:hover::before { opacity: 1; }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            color: var(--text);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .stat-label { color: var(--text-muted); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; }
 
         /* ---- SECTION BASE ---- */
         .section { padding: 96px 0; }
@@ -488,7 +504,7 @@
             background: var(--accent);
             color: white;
             padding: 5px 18px;
-            border-radius: 100px;
+            border-radius: 4px;
             font-size: 0.75rem;
             font-weight: 700;
         }
@@ -543,7 +559,7 @@
             background: var(--green);
             color: white;
             padding: 5px 12px;
-            border-radius: 100px;
+            border-radius: 4px;
             font-size: 0.7rem;
             font-weight: 700;
             display: none;
@@ -646,7 +662,8 @@
         @media (max-width: 900px) {
             .layers-grid, .pricing-grid { grid-template-columns: repeat(2, 1fr); }
             .dev-grid, .testimonial-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0; }
+            .stats-grid > div { border-bottom: 1px solid var(--border); }
             .hero h1 { font-size: 2.8rem; }
             .nav-links a:not(.nav-cta) { display: none; }
         }
@@ -656,8 +673,8 @@
             .hero p { font-size: 1rem; }
             .section-title { font-size: 2rem; }
             .layers-grid, .pricing-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .stat-number { font-size: 2rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0; }
+            .stat-number { font-size: 1.8rem; }
             .cta h2 { font-size: 2rem; }
             .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
             .comparison-table { font-size: 0.8rem; }
@@ -692,7 +709,6 @@
         <p>WonderwallAi is an AI firewall SDK that blocks prompt injection, data leaks, and off-topic abuse. Runs locally with zero external API calls.</p>
         <div class="hero-buttons">
             <a href="https://github.com/Buddafest/wonderwallai" class="btn btn-primary btn-lg">View on GitHub</a>
-            <a href="#pricing" class="btn btn-outline btn-lg">See Pricing</a>
         </div>
         <div class="install-cmd">
             <span class="dollar">$</span> pip install wonderwallai
@@ -1183,8 +1199,7 @@ wall = Wonderwall(
         <h2 class="fade-in">Ready to Protect Your LLM?</h2>
         <p class="fade-in">Get started in under 5 minutes. Free forever for the SDK. No credit card required for the hosted API free tier.</p>
         <div class="cta-buttons fade-in">
-            <a href="#pricing" class="btn btn-primary btn-lg">See Pricing</a>
-            <a href="https://github.com/Buddafest/wonderwallai#quick-start" class="btn btn-outline btn-lg">Read the Docs</a>
+            <a href="https://github.com/Buddafest/wonderwallai" class="btn btn-primary btn-lg">Get Started Free</a>
         </div>
     </div>
 </section>
