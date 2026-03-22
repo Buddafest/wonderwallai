@@ -210,7 +210,7 @@
 <body>
 
 <!-- ═══ NAV ═══ -->
-<nav class="nav" id="nav">
+<nav class="nav" id="nav" style="display:none">
     <a href="./" class="nav-brand">WonderwallAi <span>/ Dashboard</span></a>
     <div style="display:flex;align-items:center;gap:16px;">
         <ul class="nav-links" style="display:none" id="nav-links">
@@ -442,6 +442,7 @@ function logout() {
     sessionStorage.removeItem('ww_key');
     document.getElementById('dashboard').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('nav').style.display = 'none';
     document.getElementById('nav-links').style.display = 'none';
     document.getElementById('logout-btn').style.display = 'none';
     document.getElementById('api-key-input').value = '';
@@ -450,6 +451,7 @@ function logout() {
 function showDashboard() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('nav').style.display = 'flex';
     document.getElementById('nav-links').style.display = 'flex';
     document.getElementById('logout-btn').style.display = 'block';
     loadOverview();
