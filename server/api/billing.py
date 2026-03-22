@@ -82,14 +82,18 @@ async def get_subscription(api_key: ApiKey = Depends(get_current_api_key)):
     now = datetime.now(timezone.utc)
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-    async with get_db() as db:
-        result = await db.execute(
-            select(func.count(UsageRecord.id)).where(
-                UsageRecord.api_key_id == api_key.id,
-                UsageRecord.timestamp >= month_start,
+    try:
+        async with get_db() as db:
+            result = await db.execute(
+                select(func.count(UsageRecord.id)).where(
+                    UsageRecord.api_key_id == api_key.id,
+                    UsageRecord.timestamp >= month_start,
+                )
             )
-        )
-        scans_used = result.scalar() or 0
+            scans_used = result.scalar() or 0
+    except Exception as e:
+        logger.warning(f"Failed to count usage records: {e}")
+        scans_used = 0
 
     overage = max(0, scans_used - included_scans)
 
