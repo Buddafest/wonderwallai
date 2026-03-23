@@ -405,8 +405,8 @@
             <p>The SDK is published on PyPI under the MIT license with 59 passing tests. It is LLM-agnostic and framework-agnostic &mdash; it functions as middleware between the user input and the model call. A hosted REST API is also available for teams that prefer an HTTP integration over a Python dependency.</p>
 
             <h2>Pricing</h2>
-            <p>Jerry operates on a flat monthly subscription plus a per-resolution fee. Starter is $49/month with 500 conversations included, Growth is $149/month with unlimited conversations, and Scale is $499/month with dedicated support. All tiers charge $0.25 per AI resolution. There is no revenue share.</p>
-            <p>WonderwallAi's SDK is free and open source. The hosted API offers a free tier at 1,000 scans/month, with paid plans at $19/month (50K scans), $99/month (500K scans), and $249/month (2M scans). The first 300 paying customers receive 50% off for life through the early bird programme.</p>
+            <p>Jerry operates on a flat monthly subscription plus a per-resolution fee. Starter is $49/month with 500 conversations included, Growth is $149/month with unlimited conversations, and Scale is $499/month with dedicated support. All tiers charge $0.25 per AI resolution. There is no revenue share. The first 150 customers receive 50% off for life.</p>
+            <p>WonderwallAi's SDK is free and open source. The hosted API offers a free tier at 1,000 scans/month, with paid plans at $19/month (50K scans), $99/month (500K scans), and $249/month (2M scans). The first 300 paying customers receive 50% off for life.</p>
 
             <h2>Architecture Notes</h2>
             <p>Both products share the same near-black UI palette and deploy to Railway. Jerry's conversation engine uses a pipeline architecture where each stage (intent classification, entity extraction, data retrieval, response generation) operates independently and fails gracefully. If Pinecone is unreachable, Jerry falls back to keyword search. If the billing service is down, conversations continue and usage is reconciled later.</p>
