@@ -57,14 +57,28 @@ async def checkout(plan: str = "starter"):
     if overage_price:
         line_items.append({"price": overage_price})
 
+    # Auto-apply early bird coupon if promotion is still active
+    checkout_kwargs = {
+        "mode": "subscription",
+        "line_items": line_items,
+        "success_url": "https://wonderwallai.skintlabs.ai/?checkout=success",
+        "cancel_url": "https://wonderwallai.skintlabs.ai/#pricing",
+    }
+
+    settings = get_settings()
+    if settings.early_bird_coupon_id and _billing_service and _billing_service.configured:
+        try:
+            if await _billing_service.is_early_bird_available():
+                checkout_kwargs["discounts"] = [{"coupon": settings.early_bird_coupon_id}]
+            else:
+                checkout_kwargs["allow_promotion_codes"] = True
+        except Exception:
+            checkout_kwargs["allow_promotion_codes"] = True
+    else:
+        checkout_kwargs["allow_promotion_codes"] = True
+
     try:
-        session = stripe_mod.checkout.Session.create(
-            mode="subscription",
-            line_items=line_items,
-            success_url="https://wonderwallai.skintlabs.ai/?checkout=success",
-            cancel_url="https://wonderwallai.skintlabs.ai/#pricing",
-            allow_promotion_codes=True,
-        )
+        session = stripe_mod.checkout.Session.create(**checkout_kwargs)
         return RedirectResponse(session.url, status_code=303)
     except Exception as e:
         logger.error(f"Failed to create Checkout Session: {e}")
