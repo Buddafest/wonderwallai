@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-elite=1.0">
+    <title>Skint Labs — AI-Powered Tools for E-Commerce</title>
+    <meta name="description" content="Skint Labs builds AI-powered tools for the next generation of e-commerce. Home of Jerry The Customer Service Bot and WonderwallAi.">
+    <meta property="og:title" content="Skint Labs — AI-Powered Tools for E-Commerce">
+    <meta property="og:description" content="Two AI products, one solo founder. Jerry The Customer Service Bot for Shopify and WonderwallAi, an open-source AI firewall SDK.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://skintlabs.ai/og-image.png">
+    <meta property="og:url" content="https://skintlabs.ai">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Skint Labs — AI-Powered Tools for E-Commerce">
+    <meta name="twitter:description" content="Two AI products, one solo founder. Jerry The Customer Service Bot for Shopify and WonderwallAi, an open-source AI firewall SDK.">
+    <meta name="twitter:image" content="https://skintlabs.ai/og-image.png">
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Dancing+Script:wght@700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Neon Future';
+            src: url('../assets/NeonFuture.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --burnt-orange: #e76f51;
+            --coral: #f4a261;
+            --warm-sand: #e9c46a;
+            --deep-purple: #264653;
+            --terracotta: #c1666b;
+            --bg: #0c0b0a;
+            --bg-subtle: #141210;
+            --bg-card: #1e1b18;
+            --bg-card-hover: #252320;
+            --border: #2e2a25;
+            --border-hover: #3d3830;
+            --text: #d4b896;
+            --text-bright: #ede8e0;
+            --text-muted: #8a7d6e;
+            --gradient-sunset: linear-gradient(135deg, #e76f51 0%, #f4a261 40%, #e9c46a 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        a { color: var(--burnt-orange); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--coral); }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ═══════════════════════════════════════════
+           NAV BAR
+           ═══════════════════════════════════════════ */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(12, 11, 10, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .nav-brand svg {
+            width: 32px;
+            height: auto;
+        }
+
+        .nav-brand-text {
+            font-family: 'Neon Future', 'Inter', sans-serif;
+            font-size: 1.15rem;
+            letter-spacing: 3px;
+            background: var(--gradient-sunset);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-bright);
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px;
+        }
+        .hamburger span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--text-muted);
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        /* ═══════════════════════════════════════════
+           HERO
+           ═══════════════════════════════════════════ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 32px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(231, 111, 81, 0.06) 0%, rgba(244, 162, 97, 0.03) 40%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -55%);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(38, 70, 83, 0.06) 0%, transparent 70%);
+            top: 30%;
+            left: 20%;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            text-align: center;
+            max-width: 800px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-mascot {
+            width: 180px;
+            height: auto;
+            margin-bottom: 8px;
+            animation: float 4s ease-in-out infinite;
+            filter: drop-shadow(0 20px 40px rgba(231, 111, 81, 0.08));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-14px); }
+        }
+
+        .hero-title {
+            font-family: 'Neon Future', 'Inter', sans-serif;
+            font-size: clamp(2.8rem, 7vw, 5.5rem);
+            letter-spacing: 6px;
+            line-height: 1.1;
+        }
+
+        .hero-title .gradient {
+            background: var(--gradient-sunset);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-tagline {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.4rem;
+            color: var(--burnt-orange);
+            opacity: 0.85;
+            margin-top: -8px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: var(--text);
+            max-width: 540px;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-filled {
+            background: var(--terracotta);
+            color: var(--text-bright);
+            box-shadow: 0 4px 20px rgba(193, 102, 107, 0.25);
+        }
+
+        .btn-filled:hover {
+            background: #d07478;
+            color: var(--text-bright);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(193, 102, 107, 0.35);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--burnt-orange);
+            border: 1.5px solid var(--burnt-orange);
+        }
+
+        .btn-outline:hover {
+            background: rgba(231, 111, 81, 0.1);
+            color: var(--coral);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(231, 111, 81, 0.15);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text);
+            border: 1.5px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--burnt-orange);
+            color: var(--burnt-orange);
+            background: rgba(231, 111, 81, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .btn-small {
+            padding: 10px 22px;
+            font-size: 0.85rem;
+        }
+
+        /* ═══════════════════════════════════════════
+           SECTION STYLES
+           ═══════════════════════════════════════════ */
+        .section {
+            padding: 100px 0;
+        }
+
+        .section-alt {
+            background: var(--bg-subtle);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 56px;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--burnt-orange);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: 'Neon Future', 'Inter', sans-serif;
+            font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+            letter-spacing: 2px;
+            color: var(--text-bright);
+            margin-bottom: 16px;
+        }
+
+        .section-title .gradient {
+            background: var(--gradient-sunset);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-desc {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            max-width: 560px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* ═══════════════════════════════════════════
+           PRODUCTS
+           ═══════════════════════════════════════════ */
+        .products-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .product-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px;
+            transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .product-tag {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            width: fit-content;
+        }
+
+        .tag-jerry { background: rgba(193, 102, 107, 0.15); color: #d07478; }
+        .tag-wonderwall { background: rgba(231, 111, 81, 0.12); color: var(--coral); }
+
+        .product-name {
+            font-family: 'Neon Future', 'Inter', sans-serif;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            background: var(--gradient-sunset);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .product-desc {
+            color: var(--text);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 28px;
+            flex-grow: 1;
+        }
+
+        .feature-list li {
+            padding: 6px 0;
+            font-size: 0.88rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-list li::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .jerry-features li::before { background: var(--terracotta); }
+        .wonderwall-features li::before { background: var(--burnt-orange); }
+
+        .product-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* ═══════════════════════════════════════════
+           ABOUT / FOUNDER
+           ═══════════════════════════════════════════ */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 56px;
+            align-items: center;
+        }
+
+        .about-text p {
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .about-text p:last-child { margin-bottom: 0; }
+
+        .about-highlight {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px;
+            text-align: center;
+        }
+
+        .about-stat {
+            font-family: 'Neon Future', 'Inter', sans-serif;
+            font-size: 3rem;
+            letter-spacing: 2px;
+            background: var(--gradient-sunset);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .about-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 32px;
+        }
+
+        .about-quote {
+            font-style: italic;
+            font-size: 1.05rem;
+            color: var(--text);
+            line-height: 1.7;
+            padding: 20px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .about-quote-attr {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-style: normal;
+            margin-top: 12px;
+        }
+
+        /* ═══════════════════════════════════════════
+           ARCHITECTURE
+           ═══════════════════════════════════════════ */
+        .arch-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .arch-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px;
+        }
+
+        .arch-card-title {
+            font-family: 'Neon Future', 'Inter', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            background: var(--gradient-sunset);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 24px;
+        }
+
+        .arch-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .arch-step {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: rgba(12, 11, 10, 0.6);
+            border: 1px solid var(--border);
+        }
+
+        .arch-step-icon {
+            font-size: 1.3rem;
+            width: 36px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .arch-step-text {
+            font-size: 0.88rem;
+            color: var(--text);
+        }
+
+        .arch-step-text strong {
+            color: var(--text-bright);
+            font-weight: 600;
+        }
+
+        .arch-arrow {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 4px 0;
+            opacity: 0.5;
+        }
+
+        .arch-layers {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .arch-layer {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .arch-layer-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            color: var(--bg);
+        }
+
+        .layer-1 { background: var(--burnt-orange); }
+        .layer-2 { background: var(--coral); }
+        .layer-3 { background: var(--warm-sand); }
+        .layer-4 { background: var(--deep-purple); color: var(--text-bright); }
+
+        .arch-layer-text {
+            font-size: 0.88rem;
+        }
+
+        .arch-layer-text strong {
+            color: var(--text-bright);
+            display: block;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .arch-layer-text span {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* ═══════════════════════════════════════════
+           PRICING
+           ═══════════════════════════════════════════ */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .pricing-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px 36px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pricing-card-title {
+            font-family: 'Neon Future', 'Inter', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            background: var(--gradient-sunset);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 24px;
+        }
+
+        .pricing-tier {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pricing-tier:last-of-type {
+            border-bottom: none;
+        }
+
+        .pricing-tier-name {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .pricing-amount {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-bright);
+        }
+
+        .pricing-amount span {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .pricing-note {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .pricing-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            background: rgba(231, 111, 81, 0.12);
+            color: var(--coral);
+            margin: 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ── EARLY BIRD ── */
+        .early-bird-banner {
+            background: linear-gradient(135deg, rgba(231,111,81,0.08), rgba(244,162,97,0.08));
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 18px 24px;
+            margin-bottom: 20px;
+        }
+        .early-bird-inner { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; }
+        .early-bird-icon { font-size: 1.8rem; }
+        .early-bird-text { text-align: left; flex: 1; min-width: 160px; }
+        .early-bird-text strong { color: var(--accent); font-size: 1rem; display: block; }
+        .early-bird-text span { color: var(--text-muted); font-size: 0.85rem; }
+        .early-bird-counter { text-align: center; min-width: 70px; }
+        .early-bird-count { font-size: 2rem; font-weight: 900; color: var(--accent); display: block; line-height: 1; }
+        .early-bird-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+        .eb-badge {
+            display: none;
+            background: var(--accent);
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 6px;
+        }
+        .price-original { font-size: 0.85rem; color: var(--text-muted); text-decoration: line-through; display: none; }
+        .price-discounted { display: none; color: var(--accent); font-weight: 700; }
+
+        .pricing-cta {
+            margin-top: auto;
+            padding-top: 24px;
+        }
+
+        .pricing-cta .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ═══════════════════════════════════════════
+           BLOG
+           ═══════════════════════════════════════════ */
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .blog-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: border-color 0.3s, transform 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-3px);
+        }
+
+        .blog-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
+
+        .blog-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-bright);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .blog-excerpt {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .blog-link {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--burnt-orange);
+        }
+
+        .blog-link:hover {
+            color: var(--coral);
+        }
+
+        /* ═══════════════════════════════════════════
+           FOOTER
+           ═══════════════════════════════════════════ */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 60px 0 40px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .footer-brand svg {
+            width: 28px;
+            height: auto;
+        }
+
+        .footer-brand-text {
+            font-family: 'Neon Future', 'Inter', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            background: var(--gradient-sunset);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-tagline {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .footer-heading {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-bright);
+            margin-bottom: 16px;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-bright);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-copy {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 6px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        /* ═══════════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════════ */
+        @media (max-width: 900px) {
+            .products-grid,
+            .arch-grid,
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 32px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .nav {
+                padding: 0 16px;
+            }
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                background: rgba(12, 11, 10, 0.95);
+                backdrop-filter: blur(20px);
+                padding: 24px;
+                gap: 20px;
+                border-bottom: 1px solid var(--border);
+            }
+            .nav-links.open { display: flex; }
+            .hamburger { display: flex; }
+            .hero { padding: 100px 16px 60px; }
+            .hero-mascot { width: 140px; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .section { padding: 60px 0; }
+            .product-card, .arch-card, .pricing-card, .blog-card { padding: 28px 24px; }
+            .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+            .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ NAV ═══ -->
+    <nav class="nav" role="navigation">
+        <a href="#" class="nav-brand">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" fill="none">
+                <defs>
+                    <filter id="ng" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    <linearGradient id="njb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a1815" stop-opacity="0.9"/><stop offset="100%" stop-color="#0d0c0a" stop-opacity="0.95"/></linearGradient>
+                    <clipPath id="njc"><rect x="50" y="95" width="100" height="120" rx="12"/></clipPath>
+                </defs>
+                <rect x="70" y="85" width="60" height="14" rx="3" fill="#2a2520" stroke="#3d3830" stroke-width="1.5"/>
+                <rect x="75" y="82" width="50" height="6" rx="2" fill="#3d3830"/>
+                <rect x="50" y="95" width="100" height="120" rx="12" fill="url(#njb)" stroke="#2e2a25" stroke-width="1.5"/>
+                <g clip-path="url(#njc)" filter="url(#ng)">
+                    <line x1="100" y1="105" x2="100" y2="205" stroke="#e76f51" stroke-width="1.8" opacity="0.7"/>
+                    <path d="M 85 120 Q 115 120, 115 135 Q 115 150, 85 150 Q 55 150, 85 165 Q 115 165, 115 180 Q 115 195, 85 195" stroke="#e76f51" stroke-width="2.5" fill="none" opacity="0.9" stroke-linecap="round"/>
+                </g>
+                <rect x="68" y="40" width="64" height="48" rx="6" fill="#4a4032" stroke="#3d3830" stroke-width="1"/>
+                <rect x="72" y="44" width="18" height="10" rx="2" fill="#e76f51" opacity="0.8" transform="rotate(-5, 81, 49)"/>
+                <rect x="95" y="42" width="16" height="9" rx="2" fill="#f4a261" opacity="0.8" transform="rotate(3, 103, 46)"/>
+                <rect x="115" y="46" width="14" height="8" rx="2" fill="#e9c46a" opacity="0.8" transform="rotate(-2, 122, 50)"/>
+                <circle cx="88" cy="66" r="4" fill="#0c0b0a"/><circle cx="112" cy="66" r="4" fill="#0c0b0a"/>
+                <circle cx="89" cy="65" r="1.2" fill="#ede8e0" opacity="0.6"/><circle cx="113" cy="65" r="1.2" fill="#ede8e0" opacity="0.6"/>
+                <line x1="92" y1="75" x2="108" y2="75" stroke="#0c0b0a" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span class="nav-brand-text">SKINT LABS</span>
+        </a>
+        <button class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-links">
+            <li><a href="https://jerry.skintlabs.ai">Jerry</a></li>
+            <li><a href="https://wonderwallai.skintlabs.ai">WonderwallAi</a></li>
+            <li><a href="/blog/">Blog</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="mailto:skintlabs@gmail.com">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- ═══ HERO ═══ -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <!-- Inline mascot SVG -->
+            <svg class="hero-mascot" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" fill="none">
+                <defs>
+                    <filter id="hg" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    <linearGradient id="hjb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a1815" stop-opacity="0.9"/><stop offset="100%" stop-color="#0d0c0a" stop-opacity="0.95"/></linearGradient>
+                    <clipPath id="hjc"><rect x="50" y="95" width="100" height="120" rx="12"/></clipPath>
+                </defs>
+                <rect x="70" y="85" width="60" height="14" rx="3" fill="#2a2520" stroke="#3d3830" stroke-width="1.5"/>
+                <rect x="75" y="82" width="50" height="6" rx="2" fill="#3d3830"/>
+                <rect x="50" y="95" width="100" height="120" rx="12" fill="url(#hjb)" stroke="#2e2a25" stroke-width="1.5"/>
+                <g clip-path="url(#hjc)" filter="url(#hg)">
+                    <line x1="100" y1="105" x2="100" y2="205" stroke="#e76f51" stroke-width="1.8" opacity="0.7"/>
+                    <line x1="65" y1="130" x2="135" y2="130" stroke="#f4a261" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="70" y1="155" x2="130" y2="155" stroke="#f4a261" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="68" y1="180" x2="132" y2="180" stroke="#f4a261" stroke-width="1.2" opacity="0.5"/>
+                    <path d="M 85 120 Q 115 120, 115 135 Q 115 150, 85 150 Q 55 150, 85 165 Q 115 165, 115 180 Q 115 195, 85 195" stroke="#e76f51" stroke-width="2.5" fill="none" opacity="0.9" stroke-linecap="round"/>
+                    <circle cx="100" cy="130" r="3" fill="#e76f51" opacity="0.8"/>
+                    <circle cx="100" cy="155" r="3" fill="#f4a261" opacity="0.8"/>
+                    <circle cx="100" cy="180" r="3" fill="#e76f51" opacity="0.8"/>
+                    <circle cx="75" cy="130" r="2" fill="#f4a261" opacity="0.6"/>
+                    <circle cx="125" cy="130" r="2" fill="#f4a261" opacity="0.6"/>
+                    <circle cx="75" cy="155" r="2" fill="#e9c46a" opacity="0.6"/>
+                    <circle cx="125" cy="155" r="2" fill="#e9c46a" opacity="0.6"/>
+                    <circle cx="85" cy="120" r="2.5" fill="#e76f51" opacity="0.7"/>
+                    <circle cx="85" cy="195" r="2.5" fill="#e76f51" opacity="0.7"/>
+                </g>
+                <rect x="68" y="40" width="64" height="48" rx="6" fill="#4a4032" stroke="#3d3830" stroke-width="1"/>
+                <rect x="72" y="44" width="18" height="10" rx="2" fill="#e76f51" opacity="0.8" transform="rotate(-5, 81, 49)"/>
+                <rect x="95" y="42" width="16" height="9" rx="2" fill="#f4a261" opacity="0.8" transform="rotate(3, 103, 46)"/>
+                <rect x="115" y="46" width="14" height="8" rx="2" fill="#e9c46a" opacity="0.8" transform="rotate(-2, 122, 50)"/>
+                <rect x="78" y="58" width="20" height="9" rx="2" fill="#264653" opacity="0.7" transform="rotate(4, 88, 62)"/>
+                <rect x="102" y="60" width="16" height="8" rx="2" fill="#c1666b" opacity="0.7" transform="rotate(-3, 110, 64)"/>
+                <circle cx="88" cy="66" r="4" fill="#0c0b0a"/><circle cx="112" cy="66" r="4" fill="#0c0b0a"/>
+                <circle cx="89" cy="65" r="1.2" fill="#ede8e0" opacity="0.6"/><circle cx="113" cy="65" r="1.2" fill="#ede8e0" opacity="0.6"/>
+                <line x1="92" y1="75" x2="108" y2="75" stroke="#0c0b0a" stroke-width="2" stroke-linecap="round"/>
+                <g stroke="#4a4032" stroke-width="5" stroke-linecap="round" fill="none">
+                    <line x1="50" y1="120" x2="25" y2="140"/>
+                    <line x1="25" y1="140" x2="15" y2="165"/>
+                </g>
+                <circle cx="50" cy="120" r="5" fill="#3d3830"/>
+                <circle cx="25" cy="140" r="4" fill="#3d3830"/>
+                <circle cx="15" cy="165" r="6" fill="#4a4032" stroke="#e76f51" stroke-width="1" opacity="0.8"/>
+                <g stroke="#4a4032" stroke-width="5" stroke-linecap="round" fill="none">
+                    <line x1="150" y1="120" x2="175" y2="140"/>
+                    <line x1="175" y1="140" x2="185" y2="165"/>
+                </g>
+                <circle cx="150" cy="120" r="5" fill="#3d3830"/>
+                <circle cx="175" cy="140" r="4" fill="#3d3830"/>
+                <circle cx="185" cy="165" r="6" fill="#4a4032" stroke="#e76f51" stroke-width="1" opacity="0.8"/>
+                <rect x="18" y="132" width="14" height="6" rx="1.5" fill="#e76f51" opacity="0.6" transform="rotate(-30, 25, 135)"/>
+                <rect x="170" y="132" width="14" height="6" rx="1.5" fill="#264653" opacity="0.6" transform="rotate(30, 177, 135)"/>
+            </svg>
+
+            <h1 class="hero-title">
+                <span class="gradient">SKINT LABS</span>
+            </h1>
+
+            <div class="hero-tagline">Change</div>
+
+            <p class="hero-subtitle">
+                AI-powered tools for the next generation of e-commerce.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="https://jerry.skintlabs.ai" class="btn btn-filled">Meet Jerry &rarr;</a>
+                <a href="https://wonderwallai.skintlabs.ai" class="btn btn-outline">Explore WonderwallAi</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ PRODUCTS ═══ -->
+    <section class="section" id="products">
+        <div class="container">
+            <div class="section-header fade-in">
+                <div class="section-label">Our Products</div>
+                <h2 class="section-title"><span class="gradient">WHAT WE BUILD</span></h2>
+                <p class="section-desc">Two products. One mission. Making AI accessible, secure, and useful for businesses of every size.</p>
+            </div>
+
+            <div class="products-grid">
+                <div class="product-card fade-in">
+                    <span class="product-tag tag-jerry">AI Customer Service</span>
+                    <h3 class="product-name">JERRY</h3>
+                    <p class="product-desc">The Customer Service Bot for Shopify. Jerry connects to your store's data to answer customer questions 24/7 with real, accurate information.</p>
+                    <ul class="feature-list jerry-features">
+                        <li>Semantic product search in natural language</li>
+                        <li>Real-time order tracking via Shopify API</li>
+                        <li>Automated returns and refunds handling</li>
+                        <li>Voice chat in 50+ languages</li>
+                        <li>Revenue attribution, cross-sell and up-sell training</li>
+                    </ul>
+                    <div class="product-links">
+                        <a href="https://jerry.skintlabs.ai" class="btn btn-filled btn-small">Learn More &rarr;</a>
+                        <a href="https://sunsetbot-production.up.railway.app/static/demo.html" class="btn btn-ghost btn-small">Try Demo</a>
+                    </div>
+                </div>
+
+                <div class="product-card fade-in">
+                    <span class="product-tag tag-wonderwall">LLM Security</span>
+                    <h3 class="product-name">WONDERWALL AI</h3>
+                    <p class="product-desc">An AI firewall SDK and hosted API that protects LLM-powered applications from prompt injection, data exfiltration, and off-topic abuse.</p>
+                    <ul class="feature-list wonderwall-features">
+                        <li>4-layer protection pipeline</li>
+                        <li>Under 2ms local scan latency</li>
+                        <li>Canary token leak detection</li>
+                        <li>MIT open-source SDK on PyPI</li>
+                        <li>Hosted API for zero-config setup</li>
+                    </ul>
+                    <div class="product-links">
+                        <a href="https://wonderwallai.skintlabs.ai" class="btn btn-outline btn-small">Learn More &rarr;</a>
+                        <a href="https://github.com/SkintLabs/WonderwallAi" class="btn btn-ghost btn-small">GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ ARCHITECTURE ═══ -->
+    <section class="section section-alt" id="architecture">
+        <div class="container">
+            <div class="section-header fade-in">
+                <div class="section-label">Under the Hood</div>
+                <h2 class="section-title"><span class="gradient">HOW IT WORKS</span></h2>
+                <p class="section-desc">A visual overview of both products' architecture and how they work together.</p>
+            </div>
+
+            <div class="arch-grid">
+                <div class="arch-card fade-in">
+                    <h3 class="arch-card-title">JERRY PIPELINE</h3>
+                    <div class="arch-flow">
+                        <div class="arch-step">
+                            <div class="arch-step-icon">&#x1f6d2;</div>
+                            <div class="arch-step-text"><strong>Shopify Store</strong><br>Product catalog, orders, policies</div>
+                        </div>
+                        <div class="arch-arrow">&#x2193;</div>
+                        <div class="arch-step">
+                            <div class="arch-step-icon">&#x1f9e0;</div>
+                            <div class="arch-step-text"><strong>Jerry Engine</strong><br>FastAPI + Llama 3 + Pinecone vectors</div>
+                        </div>
+                        <div class="arch-arrow">&#x2193;</div>
+                        <div class="arch-step">
+                            <div class="arch-step-icon">&#x1f6e1;</div>
+                            <div class="arch-step-text"><strong>WonderwallAi Firewall</strong><br>Scans input + output in real time</div>
+                        </div>
+                        <div class="arch-arrow">&#x2193;</div>
+                        <div class="arch-step">
+                            <div class="arch-step-icon">&#x1f4ac;</div>
+                            <div class="arch-step-text"><strong>Customer Chat</strong><br>Embeddable widget with voice + text</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arch-card fade-in">
+                    <h3 class="arch-card-title">WONDERWALL LAYERS</h3>
+                    <div class="arch-layers">
+                        <div class="arch-layer">
+                            <div class="arch-layer-num layer-1">1</div>
+                            <div class="arch-layer-text">
+                                <strong>Semantic Router</strong>
+                                <span>Cosine similarity topic matching. &lt;2ms, zero API calls.</span>
+                            </div>
+                        </div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-num layer-2">2</div>
+                            <div class="arch-layer-text">
+                                <strong>Sentinel Scan</strong>
+                                <span>LLM binary classifier for sophisticated injection.</span>
+                            </div>
+                        </div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-num layer-3">3</div>
+                            <div class="arch-layer-text">
+                                <strong>Egress Filter</strong>
+                                <span>Detects leaked API keys, PII, and canary tokens in output.</span>
+                            </div>
+                        </div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-num layer-4">4</div>
+                            <div class="arch-layer-text">
+                                <strong>File Sanitizer</strong>
+                                <span>Validates uploads, strips EXIF and GPS metadata.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ PRICING ═══ -->
+    <section class="section" id="pricing">
+        <div class="container">
+            <div class="section-header fade-in">
+                <div class="section-label">Pricing</div>
+                <h2 class="section-title"><span class="gradient">BUILT LEAN</span></h2>
+                <p class="section-desc">Premium AI tools without enterprise price tags.</p>
+            </div>
+
+            <div class="pricing-grid">
+                <div class="pricing-card fade-in" style="position: relative;">
+                    <span class="eb-badge">50% OFF</span>
+                    <h3 class="pricing-card-title">JERRY</h3>
+                    <div class="early-bird-banner">
+                        <div class="early-bird-inner">
+                            <span class="early-bird-icon">&#127820;</span>
+                            <div class="early-bird-text">
+                                <strong>Early Bird: 50% off forever</strong>
+                                <span>Half-price for life. First 150 customers only.</span>
+                            </div>
+                            <div class="early-bird-counter">
+                                <span class="early-bird-count">150</span>
+                                <span class="early-bird-label">spots left</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pricing-tier" data-full="49" data-discounted="24.50">
+                        <div class="pricing-tier-name">Base</div>
+                        <div class="pricing-amount">
+                            <span class="price-original">$49/mo</span>
+                            <span class="price-full">$49</span><span class="price-discounted">$24.50</span> <span>/mo</span>
+                        </div>
+                        <div class="pricing-note">500 conversations, full platform, $0.25/resolution</div>
+                    </div>
+                    <div class="pricing-tier" data-full="149" data-discounted="74.50">
+                        <div class="pricing-tier-name">Growth</div>
+                        <div class="pricing-amount">
+                            <span class="price-original">$149/mo</span>
+                            <span class="price-full">$149</span><span class="price-discounted">$74.50</span> <span>/mo</span>
+                        </div>
+                        <div class="pricing-note">Unlimited conversations, priority support, brand voice</div>
+                    </div>
+                    <div class="pricing-tier" data-full="499" data-discounted="249.50">
+                        <div class="pricing-tier-name">Elite</div>
+                        <div class="pricing-amount">
+                            <span class="price-original">$499/mo</span>
+                            <span class="price-full">$499</span><span class="price-discounted">$249.50</span> <span>/mo</span>
+                        </div>
+                        <div class="pricing-note">Dedicated manager, custom workflows, advanced analytics</div>
+                    </div>
+                    <div class="pricing-cta">
+                        <a href="https://sunsetbot-production.up.railway.app/static/demo.html" class="btn btn-filled">Try Free Demo</a>
+                    </div>
+                </div>
+
+                <div class="pricing-card fade-in" style="position: relative;">
+                    <span class="eb-badge">50% OFF</span>
+                    <h3 class="pricing-card-title">WONDERWALL AI</h3>
+                    <div class="early-bird-banner">
+                        <div class="early-bird-inner">
+                            <span class="early-bird-icon">&#127820;</span>
+                            <div class="early-bird-text">
+                                <strong>Early Bird: 50% off forever</strong>
+                                <span>Half-price for life. First 300 customers only.</span>
+                            </div>
+                            <div class="early-bird-counter">
+                                <span class="early-bird-count">300</span>
+                                <span class="early-bird-label">spots left</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pricing-tier">
+                        <div class="pricing-tier-name">Free</div>
+                        <div class="pricing-amount">$0 <span>/mo</span></div>
+                        <div class="pricing-note">Open-source SDK + 1,000 hosted API scans/mo</div>
+                    </div>
+                    <div class="pricing-tier" data-full="19" data-discounted="9.50">
+                        <div class="pricing-tier-name">Base</div>
+                        <div class="pricing-amount">
+                            <span class="price-original">$19/mo</span>
+                            <span class="price-full">$19</span><span class="price-discounted">$9.50</span> <span>/mo</span>
+                        </div>
+                        <div class="pricing-note">50,000 scans, 60 req/min, email support</div>
+                    </div>
+                    <div class="pricing-tier" data-full="99" data-discounted="49.50">
+                        <div class="pricing-tier-name">Pro</div>
+                        <div class="pricing-amount">
+                            <span class="price-original">$99/mo</span>
+                            <span class="price-full">$99</span><span class="price-discounted">$49.50</span> <span>/mo</span>
+                        </div>
+                        <div class="pricing-note">500,000 scans, 200 req/min, priority support</div>
+                    </div>
+                    <div class="pricing-cta">
+                        <a href="https://wonderwallai.skintlabs.ai" class="btn btn-outline">Get Started</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+    (function() {
+        document.querySelectorAll('#pricing .pricing-tier[data-full]').forEach(function(tier) {
+            var original = tier.querySelector('.price-original');
+            var full = tier.querySelector('.price-full');
+            var discounted = tier.querySelector('.price-discounted');
+            if (original) original.style.display = 'inline';
+            if (full) full.style.display = 'none';
+            if (discounted) discounted.style.display = 'inline';
+        });
+        document.querySelectorAll('#pricing .eb-badge').forEach(function(b) { b.style.display = 'inline-block'; });
+    })();
+    </script>
+
+    <!-- ═══ BLOG ═══ -->
+    <section class="section section-alt" id="blog">
+        <div class="container">
+            <div class="section-header fade-in">
+                <div class="section-label">Blog</div>
+                <h2 class="section-title"><span class="gradient">LATEST UPDATES</span></h2>
+            </div>
+
+            <div class="blog-grid">
+                <div class="blog-card fade-in">
+                    <div class="blog-date">March 26, 2026</div>
+                    <h3 class="blog-title">Introducing Skint Labs</h3>
+                    <p class="blog-excerpt">AI customer service infrastructure for Shopify and an open-source firewall SDK for LLM applications. Technical overview of both products.</p>
+                    <a href="/blog/introducing-skint-labs.html" class="blog-link">Read more &rarr;</a>
+                </div>
+
+                <div class="blog-card fade-in">
+                    <div class="blog-date">April 10, 2026</div>
+                    <h3 class="blog-title">Why We Open-Sourced Our AI Firewall</h3>
+                    <p class="blog-excerpt">WonderwallAi started as an internal security module. Here's why we extracted it, published it on PyPI, and made the SDK free under MIT.</p>
+                    <a href="/blog/open-sourced-ai-firewall.html" class="blog-link">Read more &rarr;</a>
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ ABOUT ═══ -->
+    <section class="section" id="about">
+        <div class="container">
+            <div class="section-header fade-in">
+                <div class="section-label">About</div>
+                <h2 class="section-title"><span class="gradient">SKINT LABS</span></h2>
+            </div>
+
+            <div class="about-content fade-in">
+                <div class="about-text">
+                    <p>Skint Labs is an AI security and automation software company based in Australia. The company identifies categories where existing AI tooling can be improved and where it has something genuine to bring to the table. The result is focused products that raise the bar in their respective markets.</p>
+                    <p>The two current products work hand in hand. Jerry The Customer Service Bot is an AI customer service platform for Shopify, and its conversations are protected by WonderwallAi &mdash; an open-source LLM firewall SDK that blocks prompt injection, data exfiltration, and off-topic abuse in under 2ms.</p>
+                </div>
+
+                <div class="about-highlight">
+                    <div class="about-stat">2</div>
+                    <div class="about-stat-label">Products in production</div>
+                    <div class="about-quote">
+                        "Skint" is Australian slang for broke &mdash; a reminder to build tools that are accessible, not just for companies with enterprise budgets.
+                        <div class="about-quote-attr">&mdash; Louis Constant, Founder</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-brand">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" fill="none">
+                            <defs>
+                                <filter id="fg" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                                <linearGradient id="fjb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a1815" stop-opacity="0.9"/><stop offset="100%" stop-color="#0d0c0a" stop-opacity="0.95"/></linearGradient>
+                                <clipPath id="fjc"><rect x="50" y="95" width="100" height="120" rx="12"/></clipPath>
+                            </defs>
+                            <rect x="70" y="85" width="60" height="14" rx="3" fill="#2a2520" stroke="#3d3830" stroke-width="1.5"/>
+                            <rect x="75" y="82" width="50" height="6" rx="2" fill="#3d3830"/>
+                            <rect x="50" y="95" width="100" height="120" rx="12" fill="url(#fjb)" stroke="#2e2a25" stroke-width="1.5"/>
+                            <g clip-path="url(#fjc)" filter="url(#fg)">
+                                <line x1="100" y1="105" x2="100" y2="205" stroke="#e76f51" stroke-width="1.8" opacity="0.7"/>
+                                <path d="M 85 120 Q 115 120, 115 135 Q 115 150, 85 150 Q 55 150, 85 165 Q 115 165, 115 180 Q 115 195, 85 195" stroke="#e76f51" stroke-width="2.5" fill="none" opacity="0.9" stroke-linecap="round"/>
+                            </g>
+                            <rect x="68" y="40" width="64" height="48" rx="6" fill="#4a4032" stroke="#3d3830" stroke-width="1"/>
+                            <rect x="72" y="44" width="18" height="10" rx="2" fill="#e76f51" opacity="0.8" transform="rotate(-5, 81, 49)"/>
+                            <rect x="95" y="42" width="16" height="9" rx="2" fill="#f4a261" opacity="0.8" transform="rotate(3, 103, 46)"/>
+                            <rect x="115" y="46" width="14" height="8" rx="2" fill="#e9c46a" opacity="0.8" transform="rotate(-2, 122, 50)"/>
+                            <circle cx="88" cy="66" r="4" fill="#0c0b0a"/><circle cx="112" cy="66" r="4" fill="#0c0b0a"/>
+                            <circle cx="89" cy="65" r="1.2" fill="#ede8e0" opacity="0.6"/><circle cx="113" cy="65" r="1.2" fill="#ede8e0" opacity="0.6"/>
+                            <line x1="92" y1="75" x2="108" y2="75" stroke="#0c0b0a" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span class="footer-brand-text">SKINT LABS</span>
+                    </div>
+                    <p class="footer-tagline">AI-powered tools for the next generation of e-commerce. Built lean, built smart.</p>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Products</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://jerry.skintlabs.ai">Jerry</a></li>
+                        <li><a href="https://wonderwallai.skintlabs.ai">WonderwallAi</a></li>
+                        <li><a href="https://sunsetbot-production.up.railway.app/static/demo.html">Jerry Demo</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Open Source</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/SkintLabs/WonderwallAi">WonderwallAi GitHub</a></li>
+                        <li><a href="https://pypi.org/project/wonderwallai/">PyPI Package</a></li>
+                        <li><a href="https://github.com/SkintLabs/Jerry-The-Customer-Service-Bot">Jerry GitHub</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="/blog/">Blog</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="mailto:skintlabs@gmail.com">skintlabs@gmail.com</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-copy">&copy; 2026 Skint Labs. All rights reserved.</div>
+                <div class="footer-badge">A Skint Labs Production</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ═══ SCROLL ANIMATIONS ═══ -->
+    <script>
+        // Intersection Observer for fade-in animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -40px 0px'
+        });
+
+        document.querySelectorAll('.fade-in').forEach((el) => {
+            observer.observe(el);
+        });
+
+        // Close mobile nav on link click
+        document.querySelectorAll('.nav-links a').forEach((link) => {
+            link.addEventListener('click', () => {
+                document.querySelector('.nav-links').classList.remove('open');
+            });
+        });
+    </script>
+
+</body>
+</html>
