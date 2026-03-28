@@ -1,0 +1,46 @@
+# ============================================================
+# GiLLBoT — Python Dependencies
+# ============================================================
+# Install: pip install -r requirements.txt
+# ============================================================
+
+# Web Framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.12
+
+# Database
+sqlalchemy[asyncio]==2.0.35
+asyncpg==0.29.0
+alembic==1.13.3
+
+# Config / Validation
+pydantic==2.9.2
+pydantic-settings==2.5.2
+
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Billing
+stripe==11.1.0
+
+# Email
+sendgrid==6.11.0
+
+# AI / LLM
+groq==0.11.0
+
+# Task Queue / Worker
+arq==0.26.1
+redis==5.1.1
+
+# Encryption
+cryptography==43.0.3
+
+# File handling
+aiofiles==24.1.0
+python-csv
+
+# HTTP Client
+httpx==0.27.2

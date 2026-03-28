@@ -1,0 +1,38 @@
+# ============================================================
+# GiLLBoT — Railway Deployment Config
+# ============================================================
+# Two services: web (FastAPI) and worker (arq background tasks)
+# ============================================================
+
+[build]
+builder = "nixpacks"
+
+# ---------------------------------------------------------------------------
+# Web service — FastAPI via uvicorn
+# ---------------------------------------------------------------------------
+[[services]]
+name = "web"
+
+[services.build]
+builder = "nixpacks"
+
+[services.deploy]
+startCommand = "uvicorn server.main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+# ---------------------------------------------------------------------------
+# Worker service — arq background task queue
+# ---------------------------------------------------------------------------
+[[services]]
+name = "worker"
+
+[services.build]
+builder = "nixpacks"
+
+[services.deploy]
+startCommand = "python -m arq server.worker.settings.WorkerSettings"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
