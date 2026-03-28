@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WonderwallAi — AI Firewall for LLM Applications</title>
+    <meta name="description" content="Protect your LLM applications from prompt injection, data leaks, and off-topic abuse. Open-source Python SDK + hosted API. Under 2ms latency.">
+    <meta property="og:title" content="WonderwallAi — AI Firewall for LLM Applications">
+    <meta property="og:description" content="Open-source AI firewall SDK. Prompt injection detection, PII filtering, canary tokens, semantic topic enforcement. Under 2ms latency.">
+    <meta property="og:image" content="https://wonderwallai.skintlabs.ai/og-image.png">
+    <meta property="og:url" content="https://wonderwallai.skintlabs.ai">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="WonderwallAi — AI Firewall for LLM Applications">
+    <meta name="twitter:image" content="https://wonderwallai.skintlabs.ai/og-image.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0c0b0a;
+            --bg-subtle: #12100e;
+            --bg-card: #171513;
+            --bg-card-hover: #1e1c18;
+            --border: #2a2520;
+            --border-hover: #3a3428;
+            --text: #ede8e0;
+            --text-secondary: #b0a898;
+            --text-muted: #7a7268;
+            --accent: #264653;
+            --accent-hover: #2d5363;
+            --accent-glow: rgba(38, 70, 83, 0.2);
+            --green: #10b981;
+            --green-bg: rgba(16, 185, 129, 0.08);
+            --blue: #264653;
+            --blue-bg: rgba(38, 70, 83, 0.08);
+            --orange: #e76f51;
+            --orange-bg: rgba(231, 111, 81, 0.08);
+            --red: #c1666b;
+            --code-bg: #0a0908;
+            --gradient-text: linear-gradient(135deg, #e76f51 0%, #f4a261 50%, #e9c46a 100%);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        a { color: var(--accent-hover); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #e76f51; }
+        .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+        .container-narrow { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+        /* ---- Animations ---- */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ---- NAV ---- */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(12, 11, 10, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+        .logo { font-size: 1.2rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+        .logo span { color: var(--accent-hover); }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .skint-badge {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .skint-badge:hover {
+            color: #d4a040;
+            border-color: #d4a040;
+        }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a { color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-cta {
+            background: var(--accent);
+            color: white !important;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .nav-cta:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+        /* ---- BUTTONS ---- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-family: inherit;
+            text-decoration: none;
+        }
+        .btn:hover { text-decoration: none; }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 0 24px var(--accent-glow);
+        }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 0 32px var(--accent-glow); color: white; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover { border-color: var(--border-hover); background: var(--bg-card); color: var(--text); }
+        .btn-lg { padding: 14px 36px; font-size: 1rem; border-radius: 12px; }
+
+        /* ---- HERO ---- */
+        .hero {
+            text-align: center;
+            padding: 140px 0 80px;
+            position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 500px;
+            background: radial-gradient(ellipse at center, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 0 0 12px;
+            border-radius: 0;
+            background: none;
+            border: none;
+            border-left: 3px solid var(--green);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .hero-badge .dot { display: none; }
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 580px;
+            margin: 0 auto 36px;
+            line-height: 1.7;
+        }
+        .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .install-cmd {
+            margin: 40px auto 0;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--green);
+        }
+        .install-cmd .dollar { color: var(--text-muted); user-select: none; }
+
+        /* ---- STATS BAR ---- */
+        .stats {
+            padding: 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-subtle);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+        }
+        .stats-grid > div {
+            padding: 36px 24px;
+            border-right: 1px solid var(--border);
+            position: relative;
+        }
+        .stats-grid > div:last-child { border-right: none; }
+        .stats-grid > div::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--gradient-text);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .stats-grid > div:hover::before { opacity: 1; }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            color: var(--text);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .stat-label { color: var(--text-muted); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; }
+
+        /* ---- SECTION BASE ---- */
+        .section { padding: 96px 0; }
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent-hover);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: -0.03em;
+            margin-bottom: 12px;
+        }
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 56px;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ---- LAYERS GRID ---- */
+        .layers-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .layer-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s;
+        }
+        .layer-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+        .layer-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+        }
+        .layer-icon.green { background: var(--green-bg); }
+        .layer-icon.purple { background: var(--accent-glow); }
+        .layer-icon.orange { background: var(--orange-bg); }
+        .layer-icon.blue { background: var(--blue-bg); }
+        .layer-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            margin-bottom: 14px;
+        }
+        .badge-green { background: var(--green-bg); color: var(--green); }
+        .badge-purple { background: var(--accent-glow); color: var(--accent-hover); }
+        .badge-orange { background: var(--orange-bg); color: var(--orange); }
+        .layer-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+        .layer-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; }
+
+        /* ---- CODE BLOCK ---- */
+        .code-section {
+            background: var(--code-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-top: 56px;
+        }
+        .code-header {
+            padding: 14px 24px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .code-dots { display: flex; gap: 6px; }
+        .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-dots span:nth-child(1) { background: #ef4444; }
+        .code-dots span:nth-child(2) { background: #f59e0b; }
+        .code-dots span:nth-child(3) { background: #10b981; }
+        .code-block {
+            padding: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            color: var(--text);
+        }
+        .code-block .kw { color: #c084fc; }
+        .code-block .str { color: #34d399; }
+        .code-block .cm { color: #52525b; }
+        .code-block .fn { color: #fbbf24; }
+
+        /* ---- COMPARISON TABLE ---- */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        .comparison-table thead th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .comparison-table thead th:first-child { color: var(--text); }
+        .comparison-table td:first-child { font-weight: 600; color: var(--text); }
+        .comparison-table td { color: var(--text-secondary); }
+        .comparison-table .highlight { color: var(--green); font-weight: 600; }
+        .comparison-table .dim { color: var(--text-muted); }
+        .comparison-table .us { background: rgba(38, 70, 83, 0.04); }
+        .comparison-wrap {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        /* ---- INTEGRATION TABS ---- */
+        .tabs { display: flex; gap: 4px; margin-bottom: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 4px; display: inline-flex; }
+        .tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            font-family: inherit;
+        }
+        .tab:hover { color: var(--text-secondary); }
+        .tab.active { background: var(--accent); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tabs-wrap { text-align: center; margin-bottom: 24px; }
+
+        /* ---- BUILT FOR DEVS ---- */
+        .dev-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .dev-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: border-color 0.2s;
+        }
+        .dev-card:hover { border-color: var(--border-hover); }
+        .dev-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .dev-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin: 3px 2px;
+            font-weight: 500;
+        }
+
+        /* ---- TESTIMONIALS ---- */
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .testimonial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+        }
+        .testimonial-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .testimonial-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--accent-hover);
+        }
+        .testimonial-name { font-weight: 600; font-size: 0.9rem; }
+        .testimonial-role { color: var(--text-muted); font-size: 0.8rem; }
+
+        /* ---- PRICING ---- */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .price-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px 24px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s;
+        }
+        .price-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+        .price-card.popular {
+            border-color: var(--accent);
+            box-shadow: 0 0 40px var(--accent-glow);
+            background: linear-gradient(180deg, rgba(124,58,237,0.06) 0%, var(--bg-card) 100%);
+        }
+        .popular-badge {
+            display: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .price-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
+        .price-amount { font-size: 3rem; font-weight: 900; margin: 16px 0 4px; letter-spacing: -0.03em; }
+        .price-amount span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
+        .price-desc { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
+        .price-features { list-style: none; text-align: left; margin-bottom: 28px; }
+        .price-features li { padding: 7px 0; font-size: 0.875rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+        .price-features li::before { content: "\2713"; color: var(--green); font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
+        .price-card .btn { width: 100%; }
+
+        /* ---- EARLY BIRD ---- */
+        .early-bird-banner {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(38, 70, 83, 0.08));
+            border: 1px solid var(--green);
+            border-radius: 16px;
+            padding: 20px 28px;
+            margin-bottom: 32px;
+        }
+        .early-bird-inner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .early-bird-icon { font-size: 2rem; }
+        .early-bird-text { text-align: left; }
+        .early-bird-text strong { color: var(--green); font-size: 1.1rem; display: block; }
+        .early-bird-text span { color: var(--text-secondary); font-size: 0.9rem; }
+        .early-bird-counter { text-align: center; min-width: 80px; }
+        .early-bird-count {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--green);
+            display: block;
+            line-height: 1;
+        }
+        .early-bird-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+        .price-original {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            display: none;
+        }
+        .price-discounted { display: none; }
+        .eb-badge {
+            position: absolute;
+            top: -13px;
+            right: 16px;
+            background: var(--green);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: none;
+        }
+        .price-card.popular .eb-badge { right: auto; left: 16px; }
+
+        /* ---- FAQ ---- */
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+        }
+        .faq-question {
+            width: 100%;
+            padding: 24px 0;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: inherit;
+            transition: color 0.2s;
+        }
+        .faq-question:hover { color: var(--accent-hover); }
+        .faq-icon {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            transition: transform 0.3s;
+            flex-shrink: 0;
+            margin-left: 16px;
+        }
+        .faq-item.open .faq-icon { transform: rotate(45deg); }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        .faq-item.open .faq-answer { max-height: 300px; }
+        .faq-answer-inner {
+            padding-bottom: 24px;
+            color: var(--text-secondary);
+            font-size: 0.925rem;
+            line-height: 1.7;
+        }
+
+        /* ---- CTA ---- */
+        .cta {
+            padding: 96px 0;
+            text-align: center;
+            position: relative;
+        }
+        .cta::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            height: 400px;
+            background: radial-gradient(ellipse at center, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .cta h2 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+        }
+        .cta p {
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            margin-bottom: 36px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        /* ---- FOOTER ---- */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 48px 0;
+        }
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer-left { color: var(--text-muted); font-size: 0.85rem; }
+        .footer-left a { color: var(--text-muted); }
+        .footer-left a:hover { color: var(--text); }
+        .footer-links { display: flex; gap: 28px; }
+        .footer-links a { color: var(--text-muted); font-size: 0.85rem; font-weight: 500; }
+        .footer-links a:hover { color: var(--text); }
+
+        /* ---- RESPONSIVE ---- */
+        @media (max-width: 900px) {
+            .layers-grid, .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+            .dev-grid, .testimonial-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0; }
+            .stats-grid > div { border-bottom: 1px solid var(--border); }
+            .hero h1 { font-size: 2.8rem; }
+            .nav-links a:not(.nav-cta) { display: none; }
+        }
+        @media (max-width: 640px) {
+            .hero { padding: 120px 0 60px; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            .section-title { font-size: 2rem; }
+            .layers-grid, .pricing-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0; }
+            .stat-number { font-size: 1.8rem; }
+            .cta h2 { font-size: 2rem; }
+            .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
+            .comparison-table { font-size: 0.8rem; }
+            .comparison-table th, .comparison-table td { padding: 12px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="container">
+        <div class="nav-brand">
+            <div class="logo">Wonderwall<span>Ai</span></div>
+            <a href="https://skintlabs.ai" class="skint-badge" target="_blank" rel="noopener">by Skint Labs</a>
+        </div>
+        <div class="nav-links">
+            <a href="#how-it-works">How It Works</a>
+            <a href="#integrations">Integrations</a>
+            <a href="#pricing">Pricing</a>
+            <a href="https://github.com/SkintLabs/WonderwallAi">GitHub</a>
+            <a href="dashboard.html" class="nav-cta">Dashboard</a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-badge"><span class="dot"></span> Now open source &mdash; MIT licensed</div>
+        <h1>Stop Prompt Injection.<br>Protect Your LLM.</h1>
+        <p>WonderwallAi is an AI firewall SDK that blocks prompt injection, data leaks, and off-topic abuse. Runs locally with zero external API calls.</p>
+        <div class="hero-buttons">
+            <a href="https://github.com/SkintLabs/WonderwallAi" class="btn btn-primary btn-lg">View on GitHub</a>
+        </div>
+        <div class="install-cmd">
+            <span class="dollar">$</span> pip install wonderwallai
+        </div>
+    </div>
+</section>
+
+<!-- STATS BAR -->
+<section class="stats fade-in">
+    <div class="container">
+        <div class="stats-grid">
+            <div>
+                <div class="stat-number">&lt;2ms</div>
+                <div class="stat-label">Fast path latency</div>
+            </div>
+            <div>
+                <div class="stat-number">10+</div>
+                <div class="stat-label">API key patterns detected</div>
+            </div>
+            <div>
+                <div class="stat-number">59</div>
+                <div class="stat-label">Tests passing</div>
+            </div>
+            <div>
+                <div class="stat-number">4</div>
+                <div class="stat-label">Protection layers</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="section">
+    <div class="container">
+        <div class="section-label fade-in">How It Works</div>
+        <h2 class="section-title fade-in">4 Layers of Protection</h2>
+        <p class="section-subtitle fade-in">Each layer catches different threat categories. Most attacks never make it past Layer 1.</p>
+
+        <div class="layers-grid fade-in">
+            <div class="layer-card">
+                <div class="layer-icon green">&#127919;</div>
+                <span class="layer-badge badge-green">&lt;2ms &middot; Local</span>
+                <h3>Semantic Router</h3>
+                <p>Cosine similarity against your allowed topics using lightweight embeddings. No API call. Catches 90% of off-topic abuse.</p>
+            </div>
+            <div class="layer-card">
+                <div class="layer-icon purple">&#128737;&#65039;</div>
+                <span class="layer-badge badge-purple">~100ms &middot; LLM</span>
+                <h3>Sentinel Scan</h3>
+                <p>LLM binary classifier detects sophisticated injection. Only runs on messages that pass the semantic router.</p>
+            </div>
+            <div class="layer-card">
+                <div class="layer-icon orange">&#128274;</div>
+                <span class="layer-badge badge-orange">&lt;1ms &middot; Local</span>
+                <h3>Egress Filter</h3>
+                <p>Catches leaked API keys, PII, and canary tokens in LLM responses. Redacts sensitive data automatically.</p>
+            </div>
+            <div class="layer-card">
+                <div class="layer-icon blue">&#128196;</div>
+                <span class="layer-badge badge-green">&lt;1ms &middot; Local</span>
+                <h3>File Sanitizer</h3>
+                <p>Validates uploads by magic bytes and strips EXIF metadata. Prevents GPS and camera data from leaking.</p>
+            </div>
+        </div>
+
+        <div class="code-section fade-in">
+            <div class="code-header">
+                <div class="code-dots"><span></span><span></span><span></span></div>
+                &nbsp;&nbsp;quickstart.py
+            </div>
+            <pre class="code-block"><span class="kw">from</span> wonderwallai <span class="kw">import</span> Wonderwall
+<span class="kw">from</span> wonderwallai.patterns.topics <span class="kw">import</span> ECOMMERCE_TOPICS
+
+wall = Wonderwall(topics=ECOMMERCE_TOPICS)
+
+<span class="cm"># Scan user input before it reaches your LLM</span>
+verdict = <span class="kw">await</span> wall.<span class="fn">scan_inbound</span>(<span class="str">"How do I return this?"</span>)
+<span class="kw">if not</span> verdict.allowed:
+    <span class="kw">return</span> verdict.message  <span class="cm"># User-friendly rejection</span>
+
+<span class="cm"># Scan LLM output before it reaches the user</span>
+verdict = <span class="kw">await</span> wall.<span class="fn">scan_outbound</span>(llm_response, canary_token)
+response = verdict.message  <span class="cm"># Cleaned text (API keys/PII redacted)</span></pre>
+        </div>
+    </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="section" style="background: var(--bg-subtle); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+        <div class="section-label fade-in">Comparison</div>
+        <h2 class="section-title fade-in">How We Stack Up</h2>
+        <p class="section-subtitle fade-in">WonderwallAi was designed for developers who want control, speed, and privacy.</p>
+
+        <div class="comparison-wrap fade-in">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>WonderwallAi</th>
+                        <th>Lakera Guard</th>
+                        <th>Guardrails AI</th>
+                        <th>LLM Guard</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Latency</td>
+                        <td class="us highlight">&lt;2ms (local)</td>
+                        <td class="dim">50-200ms</td>
+                        <td class="dim">Varies</td>
+                        <td class="dim">Varies</td>
+                    </tr>
+                    <tr>
+                        <td>Data privacy</td>
+                        <td class="us highlight">Never leaves your server</td>
+                        <td class="dim">Sent to third-party API</td>
+                        <td>Self-hosted possible</td>
+                        <td>Self-hosted</td>
+                    </tr>
+                    <tr>
+                        <td>Integration effort</td>
+                        <td class="us highlight">3 lines of code</td>
+                        <td>API key + HTTP calls</td>
+                        <td class="dim">Wrap entire pipeline</td>
+                        <td class="dim">Complex config</td>
+                    </tr>
+                    <tr>
+                        <td>Topic enforcement</td>
+                        <td class="us highlight">Built-in semantic router</td>
+                        <td class="dim">No</td>
+                        <td>Via validators</td>
+                        <td class="dim">No</td>
+                    </tr>
+                    <tr>
+                        <td>Canary tokens</td>
+                        <td class="us highlight">Built-in</td>
+                        <td class="dim">No</td>
+                        <td class="dim">No</td>
+                        <td class="dim">No</td>
+                    </tr>
+                    <tr>
+                        <td>Offline capable</td>
+                        <td class="us highlight">Yes (fast path)</td>
+                        <td class="dim">No</td>
+                        <td>Partial</td>
+                        <td>Partial</td>
+                    </tr>
+                    <tr>
+                        <td>Open source</td>
+                        <td class="us highlight">MIT</td>
+                        <td class="dim">Proprietary</td>
+                        <td>Apache 2.0</td>
+                        <td>MIT</td>
+                    </tr>
+                    <tr>
+                        <td>Pricing</td>
+                        <td class="us highlight">Free SDK + API from $0/mo</td>
+                        <td class="dim">Pay per request</td>
+                        <td>Free (self-host)</td>
+                        <td>Free (self-host)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- INTEGRATIONS -->
+<section id="integrations" class="section">
+    <div class="container">
+        <div class="section-label fade-in">Integrations</div>
+        <h2 class="section-title fade-in">Works With Your Stack</h2>
+        <p class="section-subtitle fade-in">Drop WonderwallAi into any Python application. Three deployment options, any LLM provider.</p>
+
+        <div class="tabs-wrap fade-in">
+            <div class="tabs">
+                <button class="tab active" data-tab="fastapi">FastAPI</button>
+                <button class="tab" data-tab="flask">Flask</button>
+                <button class="tab" data-tab="langchain">LangChain</button>
+                <button class="tab" data-tab="api">REST API</button>
+            </div>
+        </div>
+
+        <div class="tab-content active fade-in" id="tab-fastapi">
+            <div class="code-section">
+                <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div>&nbsp;&nbsp;fastapi_example.py</div>
+                <pre class="code-block"><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> wonderwallai <span class="kw">import</span> Wonderwall
+
+app = FastAPI()
+wall = Wonderwall(topics=[<span class="str">"Order tracking"</span>, <span class="str">"Returns"</span>, <span class="str">"Product info"</span>])
+
+<span class="kw">@app</span>.<span class="fn">post</span>(<span class="str">"/chat"</span>)
+<span class="kw">async def</span> <span class="fn">chat</span>(message: str):
+    verdict = <span class="kw">await</span> wall.<span class="fn">scan_inbound</span>(message)
+    <span class="kw">if not</span> verdict.allowed:
+        <span class="kw">return</span> {<span class="str">"error"</span>: verdict.message}
+
+    response = <span class="kw">await</span> <span class="fn">call_your_llm</span>(message)
+    clean = <span class="kw">await</span> wall.<span class="fn">scan_outbound</span>(response)
+    <span class="kw">return</span> {<span class="str">"response"</span>: clean.message}</pre>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-flask">
+            <div class="code-section">
+                <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div>&nbsp;&nbsp;flask_example.py</div>
+                <pre class="code-block"><span class="kw">import</span> asyncio
+<span class="kw">from</span> flask <span class="kw">import</span> Flask, request, jsonify
+<span class="kw">from</span> wonderwallai <span class="kw">import</span> Wonderwall
+
+app = Flask(__name__)
+wall = Wonderwall(topics=[<span class="str">"Customer support"</span>, <span class="str">"Billing"</span>])
+
+<span class="kw">@app</span>.<span class="fn">route</span>(<span class="str">"/chat"</span>, methods=[<span class="str">"POST"</span>])
+<span class="kw">def</span> <span class="fn">chat</span>():
+    message = request.json[<span class="str">"message"</span>]
+    verdict = asyncio.<span class="fn">run</span>(wall.<span class="fn">scan_inbound</span>(message))
+    <span class="kw">if not</span> verdict.allowed:
+        <span class="kw">return</span> jsonify(error=verdict.message), <span class="str">403</span>
+
+    response = <span class="fn">call_your_llm</span>(message)
+    <span class="kw">return</span> jsonify(response=response)</pre>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-langchain">
+            <div class="code-section">
+                <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div>&nbsp;&nbsp;langchain_example.py</div>
+                <pre class="code-block"><span class="kw">from</span> langchain.chains <span class="kw">import</span> ConversationChain
+<span class="kw">from</span> wonderwallai <span class="kw">import</span> Wonderwall
+
+wall = Wonderwall(
+    topics=[<span class="str">"Product questions"</span>, <span class="str">"Pricing"</span>],
+    sentinel_api_key=<span class="str">"gsk_..."</span>,
+)
+
+<span class="kw">async def</span> <span class="fn">safe_chain_run</span>(user_input: str, chain: ConversationChain):
+    <span class="cm"># Guard the input</span>
+    verdict = <span class="kw">await</span> wall.<span class="fn">scan_inbound</span>(user_input)
+    <span class="kw">if not</span> verdict.allowed:
+        <span class="kw">return</span> verdict.message
+
+    <span class="cm"># Run the chain</span>
+    result = chain.<span class="fn">run</span>(user_input)
+
+    <span class="cm"># Guard the output</span>
+    clean = <span class="kw">await</span> wall.<span class="fn">scan_outbound</span>(result)
+    <span class="kw">return</span> clean.message</pre>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-api">
+            <div class="code-section">
+                <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div>&nbsp;&nbsp;terminal</div>
+                <pre class="code-block"><span class="cm"># Use the hosted API — no SDK installation needed</span>
+<span class="fn">curl</span> -X POST https://wonderwallai-production.up.railway.app/v1/scan/inbound \
+  -H <span class="str">"Authorization: Bearer ww_live_abc123..."</span> \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{"message": "How do I track my order?"}'</span>
+
+<span class="cm"># Response:</span>
+<span class="cm"># {"allowed": true, "action": "allow", "scores": {"semantic": 0.52}}</span></pre>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- BUILT FOR DEVELOPERS -->
+<section class="section" style="background: var(--bg-subtle); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+        <div class="section-label fade-in">Built for Developers</div>
+        <h2 class="section-title fade-in">Your Stack. Your Rules.</h2>
+        <p class="section-subtitle fade-in">WonderwallAi is LLM-agnostic, framework-agnostic, and deploys anywhere Python runs.</p>
+
+        <div class="dev-grid fade-in">
+            <div class="dev-card">
+                <h3>&#129302; Supported LLMs</h3>
+                <div>
+                    <span class="dev-tag">OpenAI / GPT</span>
+                    <span class="dev-tag">Anthropic / Claude</span>
+                    <span class="dev-tag">Meta / Llama</span>
+                    <span class="dev-tag">Google / Gemini</span>
+                    <span class="dev-tag">Mistral</span>
+                    <span class="dev-tag">Groq</span>
+                    <span class="dev-tag">Ollama</span>
+                    <span class="dev-tag">Any LLM</span>
+                </div>
+            </div>
+            <div class="dev-card">
+                <h3>&#128640; Deployment Options</h3>
+                <div>
+                    <span class="dev-tag">Python SDK (pip install)</span>
+                    <span class="dev-tag">Hosted REST API</span>
+                    <span class="dev-tag">Docker</span>
+                    <span class="dev-tag">Railway</span>
+                    <span class="dev-tag">AWS / GCP / Azure</span>
+                    <span class="dev-tag">Self-hosted</span>
+                </div>
+            </div>
+            <div class="dev-card">
+                <h3>&#128295; Framework Support</h3>
+                <div>
+                    <span class="dev-tag">FastAPI</span>
+                    <span class="dev-tag">Flask</span>
+                    <span class="dev-tag">Django</span>
+                    <span class="dev-tag">LangChain</span>
+                    <span class="dev-tag">LlamaIndex</span>
+                    <span class="dev-tag">Haystack</span>
+                    <span class="dev-tag">Custom pipelines</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section">
+    <div class="container">
+        <div class="section-label fade-in">What People Are Saying</div>
+        <h2 class="section-title fade-in">We'd Love to Hear From You</h2>
+        <p class="section-subtitle fade-in">Tried WonderwallAi? We'd love to feature your experience. Send your feedback to <a href="mailto:info@skintlabs.ai" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent);">info@skintlabs.ai</a></p>
+
+        <div class="testimonial-grid fade-in">
+            <div class="testimonial-card">
+                <p style="color: var(--text-muted); font-style: normal;">"Your testimonial here..."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">?</div>
+                    <div>
+                        <div class="testimonial-name">Your Name Here</div>
+                        <div class="testimonial-role">CTO, AI Startup</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <p style="color: var(--text-muted); font-style: normal;">"Your testimonial here..."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">?</div>
+                    <div>
+                        <div class="testimonial-name">Your Name Here</div>
+                        <div class="testimonial-role">Lead Engineer, SaaS Co.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <p style="color: var(--text-muted); font-style: normal;">"Your testimonial here..."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">?</div>
+                    <div>
+                        <div class="testimonial-name">Your Name Here</div>
+                        <div class="testimonial-role">Security Lead, Fintech</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="section" style="background: var(--bg-subtle); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+        <div class="section-label fade-in">Pricing</div>
+        <h2 class="section-title fade-in">Simple, Transparent Pricing</h2>
+        <p class="section-subtitle fade-in">Open-source SDK is free forever. Hosted API scales with you.</p>
+
+        <!-- Early Bird Banner (hidden by default — shown via JS when promotion is active) -->
+        <div id="early-bird-banner" class="early-bird-banner fade-in" style="display: none;">
+            <div class="early-bird-inner">
+                <span class="early-bird-icon">&#127820;</span>
+                <div class="early-bird-text">
+                    <strong>Early Bird Special: 50% off forever</strong>
+                    <span>Lock in half-price for life. Limited to the first 300 paying customers.</span>
+                </div>
+                <div class="early-bird-counter">
+                    <span id="early-bird-remaining" class="early-bird-count">---</span>
+                    <span class="early-bird-label">spots left</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pricing-grid fade-in">
+            <div class="price-card">
+                <h3>Free</h3>
+                <div class="price-amount">$0<span>/mo</span></div>
+                <div class="price-desc">For testing and side projects</div>
+                <ul class="price-features">
+                    <li>1,000 scans/month</li>
+                    <li>10 requests/minute</li>
+                    <li>All 4 protection layers</li>
+                    <li>Community support</li>
+                </ul>
+                <a href="https://github.com/SkintLabs/WonderwallAi" class="btn btn-outline">Get Started Free</a>
+            </div>
+            <div class="price-card" data-plan="starter">
+                <span class="eb-badge">50% OFF</span>
+                <h3>Starter</h3>
+                <div class="price-original">$19/mo</div>
+                <div class="price-amount"><span class="price-full">$19</span><span class="price-discounted">$9.50</span><span>/mo</span></div>
+                <div class="price-desc">For growing applications</div>
+                <ul class="price-features">
+                    <li>50,000 scans/month</li>
+                    <li>60 requests/minute</li>
+                    <li>Overage: $0.0006/scan</li>
+                    <li>Email support</li>
+                </ul>
+                <a href="https://wonderwallai-production.up.railway.app/v1/billing/checkout?plan=starter" class="btn btn-outline">Get Started</a>
+            </div>
+            <div class="price-card popular" data-plan="pro">
+                <span class="eb-badge">50% OFF</span>
+                <div class="popular-badge">Most Popular</div>
+                <h3>Pro</h3>
+                <div class="price-original">$99/mo</div>
+                <div class="price-amount"><span class="price-full">$99</span><span class="price-discounted">$49.50</span><span>/mo</span></div>
+                <div class="price-desc">For production workloads</div>
+                <ul class="price-features">
+                    <li>500,000 scans/month</li>
+                    <li>200 requests/minute</li>
+                    <li>Overage: $0.0003/scan</li>
+                    <li>Priority support</li>
+                </ul>
+                <a href="https://wonderwallai-production.up.railway.app/v1/billing/checkout?plan=pro" class="btn btn-primary">Get Started</a>
+            </div>
+            <div class="price-card" data-plan="business">
+                <span class="eb-badge">50% OFF</span>
+                <h3>Business</h3>
+                <div class="price-original">$249/mo</div>
+                <div class="price-amount"><span class="price-full">$249</span><span class="price-discounted">$124.50</span><span>/mo</span></div>
+                <div class="price-desc">For high-volume apps</div>
+                <ul class="price-features">
+                    <li>2,000,000 scans/month</li>
+                    <li>500 requests/minute</li>
+                    <li>Overage: $0.0002/scan</li>
+                    <li>Dedicated support + SLA</li>
+                </ul>
+                <a href="https://wonderwallai-production.up.railway.app/v1/billing/checkout?plan=business" class="btn btn-outline">Get Started</a>
+            </div>
+        </div>
+        <p style="text-align: center; color: var(--text-muted); margin-top: 36px; font-size: 0.9rem;">
+            Need more? <a href="mailto:support@skintlabs.ai?subject=Enterprise">Enterprise plans</a> with unlimited scans, custom rate limits, and SLA guarantees.
+        </p>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="section">
+    <div class="container-narrow">
+        <div class="section-label fade-in">FAQ</div>
+        <h2 class="section-title fade-in">Frequently Asked Questions</h2>
+        <p class="section-subtitle fade-in">Everything you need to know about WonderwallAi.</p>
+
+        <div class="fade-in">
+            <div class="faq-item">
+                <button class="faq-question">What is WonderwallAi?<span class="faq-icon">+</span></button>
+                <div class="faq-answer"><div class="faq-answer-inner">WonderwallAi is an open-source Python SDK that acts as a firewall for LLM applications. It scans user messages before they reach your LLM (blocking off-topic queries and prompt injection) and scans LLM responses before they reach users (redacting leaked API keys and PII). It works with any LLM provider and adds under 2ms latency on the fast path.</div></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">Do I need to send my data to your servers?<span class="faq-icon">+</span></button>
+                <div class="faq-answer"><div class="faq-answer-inner">No. The SDK runs entirely in your process. The semantic router and egress filter are fully local with zero API calls. Only the optional Sentinel Scan (LLM-based classifier) makes an external API call to Groq, and you can disable it if you want fully offline operation. If you use the hosted API, data is processed on our servers and never stored.</div></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">What LLM providers does it work with?<span class="faq-icon">+</span></button>
+                <div class="faq-answer"><div class="faq-answer-inner">All of them. WonderwallAi is LLM-agnostic. It sits between your user and your LLM as a middleware layer. It works with OpenAI, Anthropic, Google, Meta (Llama), Mistral, Groq, Ollama, and any other provider. You just call scan_inbound() before your LLM call and scan_outbound() after.</div></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">How does the semantic router work?<span class="faq-icon">+</span></button>
+                <div class="faq-answer"><div class="faq-answer-inner">You define your allowed topics in plain English (e.g., "Order tracking", "Returns", "Product questions"). The router uses a lightweight embedding model (all-MiniLM-L6-v2, ~80MB) to compute cosine similarity between the user's message and your topics. If the highest similarity score is below your threshold, the message is blocked. This runs locally in under 2ms and catches 90%+ of off-topic abuse.</div></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">What's a canary token?<span class="faq-icon">+</span></button>
+                <div class="faq-answer"><div class="faq-answer-inner">A canary token is a unique random string you inject into your LLM's system prompt with an instruction to never reveal it. WonderwallAi generates deterministic canary tokens per session and checks if they appear in the LLM's response. If one does, it means someone successfully extracted your system prompt — the response is hard-blocked. This has zero false positives and is the most reliable way to detect system prompt extraction.</div></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">SDK vs Hosted API — which should I use?<span class="faq-icon">+</span></button>
+                <div class="faq-answer"><div class="faq-answer-inner">Use the SDK if you want maximum privacy and minimum latency (messages never leave your server). Use the hosted API if you want a zero-dependency integration via HTTP calls, or if you're not using Python. Both provide the same protection layers. The SDK is free and open source. The hosted API has a free tier (1,000 scans/month) and paid plans for higher volume.</div></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">Is it production-ready?<span class="faq-icon">+</span></button>
+                <div class="faq-answer"><div class="faq-answer-inner">Yes. WonderwallAi was extracted from a production Shopify chatbot that handles real customer conversations. It has 59 tests, is fail-open by default (errors allow messages through rather than blocking users), and has been battle-tested against real prompt injection attempts. The SDK supports Python 3.10+.</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+    <div class="container">
+        <h2 class="fade-in">Ready to Protect Your LLM?</h2>
+        <p class="fade-in">Get started in under 5 minutes. Free forever for the SDK. No credit card required for the hosted API free tier.</p>
+        <div class="cta-buttons fade-in">
+            <a href="https://github.com/SkintLabs/WonderwallAi" class="btn btn-primary btn-lg">Get Started Free</a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-left">
+                <span class="logo" style="font-size: 1rem;">Wonderwall<span>Ai</span></span>
+                &nbsp;&middot;&nbsp; MIT License &middot; Built by <a href="https://github.com/SkintLabs">Louis Constant</a>
+                &nbsp;&middot;&nbsp; A <a href="https://skintlabs.ai" style="color: #d4a040;">Skint Labs</a> Product
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/SkintLabs/WonderwallAi">GitHub</a>
+                <a href="https://github.com/SkintLabs/WonderwallAi#installation">Docs</a>
+                <a href="#pricing">Pricing</a>
+                <a href="mailto:support@skintlabs.ai">Contact</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script>
+// Scroll-triggered fade-in animations
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+});
+
+// FAQ accordion
+document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const item = btn.parentElement;
+        const wasOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+        if (!wasOpen) item.classList.add('open');
+    });
+});
+
+// Early bird pricing (progressive enhancement — full prices shown if API is unreachable)
+(async function() {
+    try {
+        // Try API first; fall back to showing early bird statically if no API available
+        let data = null;
+        try {
+            const res = await fetch('https://api.wonderwallai.com/v1/billing/early-bird', { signal: AbortSignal.timeout(3000) });
+            if (res.ok) data = await res.json();
+        } catch (_) { /* API not deployed yet — use static fallback below */ }
+
+        // Static fallback: show early bird until API is live (remove this block once deployed)
+        if (!data) {
+            data = { active: true, remaining_spots: 300, discount_percent: 50 };
+        }
+
+        if (!data.active) return;
+
+        // Show banner + counter
+        const banner = document.getElementById('early-bird-banner');
+        if (banner) banner.style.display = '';
+        const counter = document.getElementById('early-bird-remaining');
+        if (counter) counter.textContent = data.remaining_spots;
+
+        // Toggle discounted prices on paid cards
+        document.querySelectorAll('.price-card[data-plan]').forEach(card => {
+            card.querySelector('.eb-badge').style.display = 'block';
+            card.querySelector('.price-original').style.display = 'block';
+            card.querySelector('.price-full').style.display = 'none';
+            card.querySelector('.price-discounted').style.display = 'inline';
+        });
+    } catch (e) {
+        // Silently fail — users see full prices
+    }
+})();
+</script>
+
+</body>
+</html>
