@@ -19,8 +19,6 @@ Open source (MIT), on PyPI, free tier available on the hosted API.
 
 **What I learned building both:**
 
-- AI coding tools are a genuine equaliser. I went from zero programming knowledge to shipping production software. But "vibe coding" only gets you so far — at some point you have to actually understand what the code does, especially when things break at 2am.
-
 - Building two products simultaneously as a solo founder is a bad idea that I'd do again. WonderwallAi started as an internal security module for Jerry, and I extracted it into its own product because the problem it solves is universal. The upside is they feed each other — Jerry is the proof that WonderwallAi works in production.
 
 - Pricing is genuinely the hardest part. I changed currencies (AUD to USD), restructured tiers, and agonised over every number. I'm still not sure I got it right.

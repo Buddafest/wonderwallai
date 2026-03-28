@@ -56,7 +56,7 @@ Both products reflect that philosophy. Jerry's base plan is $299/month, a fracti
 
 ## What I Learned
 
-**AI tools are a genuine equaliser, but they aren't magic.** I used AI extensively to learn programming, debug problems, and generate boilerplate. But there's a ceiling to "vibe coding" — at some point you need to understand what the code does, why it fails, and how to fix things that AI can't see from a prompt. The tools got me started. The understanding is what let me finish.
+**AI tools are a genuine equaliser, but they aren't magic.** I used AI extensively to learn programming, debug problems, and generate boilerplate. At some point you need to understand what the code does, why it fails, and how to fix things that AI can't see from a prompt. The tools got me started. The understanding is what let me finish.
 
 **Building in public is terrifying but effective.** Every time I shared progress, I got feedback that changed the direction of the product. The security layer exists because users showed me a vulnerability I hadn't considered. The revenue attribution feature exists because a Shopify store owner told me that was the only metric they cared about.
 
