@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jerry Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --burnt-orange: #e76f51;
+            --coral: #f4a261;
+            --warm-sand: #e9c46a;
+            --deep-purple: #264653;
+            --bg: #1a2332;
+            --bg-card: #1e2a3a;
+            --border: #2a3a4a;
+            --text: #c8d6e5;
+            --text-muted: #7f8fa6;
+            --text-bright: #f0f0f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 32px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 { font-family: 'Noto Serif', serif; color: var(--text-bright); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+        .header h1 { font-size: 1.6rem; }
+        .header h1 span { color: var(--coral); }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+        .badge-active { background: rgba(76,175,80,0.15); color: #66bb6a; border: 1px solid rgba(76,175,80,0.3); }
+        .badge-inactive { background: rgba(231,111,81,0.15); color: var(--burnt-orange); border: 1px solid rgba(231,111,81,0.3); }
+        .badge-plan { background: rgba(244,162,97,0.15); color: var(--coral); border: 1px solid rgba(244,162,97,0.3); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; text-align: center; }
+        .stat-value { font-family: 'Noto Serif', serif; font-size: 2rem; font-weight: 900; color: var(--coral); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+        .section { margin-bottom: 32px; }
+        .section h2 { font-size: 1.2rem; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        tr:hover { background: rgba(30,42,58,0.8); }
+
+        .resolved { color: #66bb6a; }
+        .unresolved { color: var(--text-muted); }
+        .escalated { color: var(--burnt-orange); }
+
+        .input-row { display: flex; gap: 12px; margin-bottom: 24px; }
+        .input-row input { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: 100px; padding: 10px 20px; color: var(--text-bright); font-size: 0.9rem; outline: none; }
+        .input-row input:focus { border-color: var(--burnt-orange); }
+        .input-row button { background: var(--burnt-orange); color: var(--text-bright); border: none; border-radius: 100px; padding: 10px 24px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: opacity 0.2s; }
+        .input-row button:hover { opacity: 0.9; }
+
+        .loading { text-align: center; padding: 48px; color: var(--text-muted); }
+        .error { color: var(--burnt-orange); text-align: center; padding: 24px; }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            body { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="input-row">
+        <input type="text" id="store-input" placeholder="Enter store domain (e.g. my-store.myshopify.com)" />
+        <button onclick="loadDashboard()">Load</button>
+    </div>
+
+    <div id="dashboard" style="display:none;">
+        <div class="header">
+            <div>
+                <h1><span>Jerry</span> Dashboard</h1>
+                <div id="store-info" style="margin-top: 4px; font-size: 0.85rem; color: var(--text-muted);"></div>
+            </div>
+            <div id="badges"></div>
+        </div>
+
+        <div class="stats-grid" id="stats-grid"></div>
+
+        <div class="section">
+            <h2>Recent Conversations</h2>
+            <table>
+                <thead>
+                    <tr><th>Session</th><th>Status</th><th>Escalated</th><th>Date</th></tr>
+                </thead>
+                <tbody id="chats-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="loading" class="loading" style="display:none;">Loading...</div>
+    <div id="error" class="error" style="display:none;"></div>
+
+    <script>
+        const API = window.location.origin;
+
+        async function loadDashboard() {
+            const domain = document.getElementById('store-input').value.trim();
+            if (!domain) return;
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+
+            try {
+                const [statsRes, chatsRes] = await Promise.all([
+                    fetch(`${API}/dashboard/${domain}/stats`),
+                    fetch(`${API}/dashboard/${domain}/recent-chats`),
+                ]);
+
+                if (!statsRes.ok) throw new Error(`Stats: ${statsRes.status}`);
+                const stats = await statsRes.json();
+                const chats = chatsRes.ok ? await chatsRes.json() : { chats: [] };
+
+                renderDashboard(stats, chats);
+            } catch (e) {
+                document.getElementById('error').textContent = `Error: ${e.message}`;
+                document.getElementById('error').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function renderDashboard(stats, chats) {
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('store-info').textContent = `${stats.name || stats.store}`;
+
+            const status = stats.subscription_status || 'none';
+            const statusClass = status === 'active' ? 'badge-active' : 'badge-inactive';
+            document.getElementById('badges').innerHTML = `
+                <span class="badge badge-plan">${(stats.plan || 'base').toUpperCase()}</span>
+                <span class="badge ${statusClass}" style="margin-left:8px;">${status.toUpperCase()}</span>
+            `;
+
+            const grid = document.getElementById('stats-grid');
+            const t = stats.totals || {};
+            const u = stats.usage || {};
+            grid.innerHTML = `
+                <div class="stat-card"><div class="stat-value">${t.conversations || 0}</div><div class="stat-label">Conversations</div></div>
+                <div class="stat-card"><div class="stat-value">${t.resolutions || 0}</div><div class="stat-label">Resolutions</div></div>
+                <div class="stat-card"><div class="stat-value">$${(t.attributed_revenue || 0).toLocaleString()}</div><div class="stat-label">Attributed Revenue</div></div>
+                <div class="stat-card"><div class="stat-value">${u.current || 0}/${u.limit || '~'}</div><div class="stat-label">Usage This Cycle</div></div>
+            `;
+
+            const tbody = document.getElementById('chats-body');
+            const rows = (chats.chats || []).map(c => `
+                <tr>
+                    <td style="font-family:monospace;font-size:0.8rem;">${c.session_token?.slice(0,12) || c.id}...</td>
+                    <td class="${c.resolved ? 'resolved' : 'unresolved'}">${c.resolved ? 'Resolved' : 'Open'}</td>
+                    <td class="${c.human_intervention ? 'escalated' : ''}">${c.human_intervention ? 'Yes' : 'No'}</td>
+                    <td style="color:var(--text-muted);font-size:0.85rem;">${c.created_at ? new Date(c.created_at).toLocaleString() : '—'}</td>
+                </tr>
+            `).join('');
+            tbody.innerHTML = rows || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">No conversations yet</td></tr>';
+        }
+
+        // Auto-load if URL has ?store= param
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('store')) {
+            document.getElementById('store-input').value = params.get('store');
+            loadDashboard();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — Jerry by Skint Labs</title>
+    <meta name="description" content="Privacy policy for Jerry, the AI customer service bot for Shopify by Skint Labs.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0c0b0a;
+            --bg-subtle: #141210;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --border: rgba(212, 160, 64, 0.2);
+            --border-solid: #2e2a25;
+            --text: #d4b896;
+            --text-bright: #ede8e0;
+            --text-muted: #8a7d6e;
+            --accent-terracotta: #c1666b;
+            --accent-gold: #d4a040;
+            --gradient-golden: linear-gradient(135deg, #c1666b 0%, #d4a040 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: var(--accent-gold); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--accent-terracotta); }
+
+        /* ── NAV ── */
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(12, 11, 10, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-solid);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .nav-brand-text {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            background: var(--gradient-golden);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .nav-back {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .nav-back:hover { color: var(--text-bright); }
+        .nav-back svg { width: 14px; height: 14px; }
+
+        /* ── HERO ── */
+        .hero {
+            padding: 120px 32px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(193, 102, 107, 0.07) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .hero-eyebrow {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+            padding: 6px 16px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+        }
+        .hero-title {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-weight: 900;
+            font-size: clamp(2.4rem, 6vw, 4rem);
+            color: var(--text-bright);
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+        .hero-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        /* ── CONTENT ── */
+        .content {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 36px 40px;
+            margin-bottom: 20px;
+        }
+        .section-heading {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-bright);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-heading::before {
+            content: '';
+            display: block;
+            width: 3px;
+            height: 20px;
+            background: var(--gradient-golden);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .section p {
+            margin-bottom: 12px;
+            font-size: 0.96rem;
+            line-height: 1.75;
+        }
+        .section p:last-child { margin-bottom: 0; }
+        .section ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 4px;
+        }
+        .section ul li {
+            padding: 5px 0;
+            font-size: 0.96rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .section ul li::before {
+            content: '—';
+            color: var(--accent-gold);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .highlight {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border-solid);
+            padding: 36px 32px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+        footer a { color: var(--text-muted); }
+        footer a:hover { color: var(--text-bright); }
+        .footer-inner {
+            max-width: 780px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .footer-brand {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-weight: 900;
+            font-size: 0.95rem;
+            background: var(--gradient-golden);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 600px) {
+            .nav { padding: 0 20px; }
+            .hero { padding: 100px 20px 48px; }
+            .section { padding: 24px 20px; }
+            .content { padding: 0 16px 60px; }
+            footer { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <a href="https://jerry.skintlabs.ai" class="nav-brand">
+            <span class="nav-brand-text">Jerry</span>
+        </a>
+        <a href="https://jerry.skintlabs.ai" class="nav-back">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 12L6 8l4-4"/>
+            </svg>
+            Back to jerry.skintlabs.ai
+        </a>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <span class="hero-eyebrow">Legal</span>
+        <h1 class="hero-title">Privacy Policy</h1>
+        <p class="hero-subtitle">Effective March 2026 &nbsp;·&nbsp; Skint Labs, Melbourne, Australia</p>
+    </section>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+        <div class="section">
+            <h2 class="section-heading">Overview</h2>
+            <p>This Privacy Policy describes how Skint Labs ("<span class="highlight">we</span>", "<span class="highlight">us</span>", or "<span class="highlight">our</span>") collects, uses, and handles data when merchants and their customers use Jerry, our AI-powered customer service bot for Shopify. We are committed to being transparent about our data practices and protecting the privacy of everyone who interacts with Jerry.</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-heading">Data Jerry Collects</h2>
+            <p>When a merchant installs Jerry on their Shopify store, we collect and process the following categories of data:</p>
+            <ul>
+                <li><strong>Product catalog</strong> — product titles, descriptions, prices, variants, and inventory data from the merchant's Shopify store.</li>
+                <li><strong>Order data</strong> — order identifiers, line items, and fulfilment status, used to answer order-related customer queries.</li>
+                <li><strong>Customer queries</strong> — the text messages that shoppers send to the Jerry chat widget.</li>
+                <li><strong>Chat sessions</strong> — conversation history within a session, used to maintain context and provide coherent responses.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="section-heading">How We Use Your Data</h2>
+            <p>All data collected is used exclusively to power Jerry's AI customer service functionality:</p>
+            <ul>
+                <li>Product and order data are indexed so Jerry can answer shopper questions accurately and in real time.</li>
+                <li>Chat session data is used to maintain conversational context within a single support interaction.</li>
+                <li>We do not sell, rent, or share merchant or customer data with third parties for advertising or marketing purposes.</li>
+                <li>We do not use your data to train general-purpose AI models without explicit consent.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="section-heading">Shopify Data Accessed</h2>
+            <p>Jerry accesses the following data via the Shopify API under the permissions you grant during installation:</p>
+            <ul>
+                <li><strong>Products</strong> (<code>read_products</code>, <code>write_products</code>) — to sync and index your product catalog.</li>
+                <li><strong>Orders</strong> (<code>read_orders</code>) — to look up order status and details for customer inquiries. Jerry does not modify orders.</li>
+                <li><strong>Customers</strong> (<code>read_customers</code>) — to verify customer identity when handling order-related queries. Jerry does not modify customer records.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="section-heading">Data Retention</h2>
+            <p>When you uninstall Jerry from your Shopify store, your store's data (product catalog, order data, and chat history) is retained for <span class="highlight">90 days</span> following the uninstall date. This retention period allows for reactivation without loss of your indexed data.</p>
+            <p>After 90 days, all data associated with your store is <span class="highlight">permanently and irreversibly deleted</span> from our systems, including all backups.</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-heading">Merchant Data Deletion Request</h2>
+            <p>You may request immediate deletion of all your store's data at any time — before the 90-day retention period expires — by emailing us at <a href="mailto:info@skintlabs.ai">info@skintlabs.ai</a> with the subject line <strong>"Jerry Data Deletion Request"</strong> and your Shopify store URL.</p>
+            <p>We will process deletion requests within 5 business days and send confirmation once complete.</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-heading">Third-Party Services</h2>
+            <p>Jerry relies on the following third-party infrastructure providers to operate. Each provider has their own privacy policy governing their data handling practices:</p>
+            <ul>
+                <li><strong>Groq</strong> — Large language model (LLM) inference provider. Customer queries are processed through Groq's API to generate responses. <a href="https://groq.com/privacy-policy/" target="_blank" rel="noopener">Groq Privacy Policy</a>.</li>
+                <li><strong>Pinecone</strong> — Vector database used for semantic search over your product catalog. <a href="https://www.pinecone.io/privacy/" target="_blank" rel="noopener">Pinecone Privacy Policy</a>.</li>
+                <li><strong>Railway</strong> — Cloud hosting provider where Jerry's backend is deployed. <a href="https://railway.app/legal/privacy" target="_blank" rel="noopener">Railway Privacy Policy</a>.</li>
+            </ul>
+            <p>We select providers with strong privacy and security practices and share only the minimum data necessary for each service to function.</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-heading">Security</h2>
+            <p>We implement industry-standard security measures including encrypted data transmission (TLS), secure API key management, and access controls. Our infrastructure is hosted on Railway with automatic security updates.</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-heading">Changes to This Policy</h2>
+            <p>We may update this Privacy Policy from time to time. When we do, we will update the effective date at the top of this page. Material changes will be communicated to active merchants via email. Your continued use of Jerry after changes are posted constitutes acceptance of the revised policy.</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-heading">Contact</h2>
+            <p>If you have any questions about this Privacy Policy or how we handle your data, please contact us:</p>
+            <ul>
+                <li><strong>Email:</strong> <a href="mailto:info@skintlabs.ai">info@skintlabs.ai</a></li>
+                <li><strong>Company:</strong> Skint Labs</li>
+                <li><strong>Location:</strong> Melbourne, Australia</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-inner">
+            <span class="footer-brand">Jerry by Skint Labs</span>
+            <div class="footer-links">
+                <a href="https://jerry.skintlabs.ai">Home</a>
+                <a href="https://skintlabs.ai/jerry/privacy">Privacy Policy</a>
+                <a href="https://skintlabs.ai/jerry/support">Support</a>
+                <a href="https://skintlabs.ai">Skint Labs</a>
+            </div>
+            <p>&copy; 2026 Skint Labs. Melbourne, Australia.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

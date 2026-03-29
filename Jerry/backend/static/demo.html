@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jerry The Customer Service Bot — Live Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0c0b0a;
+            color: #d4b896;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .demo-container {
+            text-align: center;
+            padding: 40px 24px;
+            max-width: 600px;
+        }
+        .demo-container h1 {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 900;
+            color: #ede8e0;
+            margin-bottom: 16px;
+        }
+        .demo-container h1 .jerry {
+            background: linear-gradient(135deg, #c1666b 0%, #d4a040 50%, #e9c46a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .demo-container p {
+            color: #c4a882;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .demo-container p.subtle {
+            color: #8a7d6e;
+            font-size: 0.9rem;
+        }
+
+        /* Pulsing chat CTA */
+        .chat-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 40px;
+            padding: 20px 40px;
+            background: #c1666b;
+            color: #ede8e0;
+            border: none;
+            border-radius: 100px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: cta-pulse 2s ease-in-out infinite;
+            text-decoration: none;
+        }
+        .chat-cta:hover {
+            background: #d07478;
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(193, 102, 107, 0.4);
+        }
+        .chat-cta svg {
+            flex-shrink: 0;
+        }
+
+        @keyframes cta-pulse {
+            0%, 100% { box-shadow: 0 4px 20px rgba(193, 102, 107, 0.2); }
+            50% { box-shadow: 0 4px 30px rgba(193, 102, 107, 0.5); }
+        }
+
+        .suggestions {
+            margin-top: 48px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .suggestion {
+            background: #1c1a17;
+            border: 1px solid #2e2a25;
+            color: #c4a882;
+            padding: 10px 18px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            cursor: default;
+            transition: border-color 0.2s;
+        }
+        .suggestion:hover {
+            border-color: #c1666b;
+            color: #ede8e0;
+        }
+
+        .powered-by {
+            margin-top: 48px;
+            color: #8a7d6e;
+            font-size: 0.8rem;
+        }
+        .powered-by a {
+            color: #d4a040;
+            text-decoration: none;
+        }
+        .powered-by a:hover {
+            color: #e0b050;
+        }
+
+        /* Hide the widget bubble since we have the CTA */
+        /* The widget will still open when bubble is clicked */
+
+        @media (max-width: 600px) {
+            .demo-container { padding: 32px 16px; }
+            .chat-cta { padding: 16px 32px; font-size: 1rem; }
+            .suggestions { gap: 8px; }
+            .suggestion { padding: 8px 14px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1><span class="jerry">Jerry</span> The Customer Service Bot</h1>
+        <p>
+            Try the live AI chat widget. Ask about products, track an order, request a return — Jerry handles it all in real time.
+        </p>
+        <p class="subtle">This is a live demo connected to a sample Shopify store.</p>
+
+        <button class="chat-cta" id="open-chat" aria-label="Start chatting with Jerry">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Start Chatting
+        </button>
+
+        <div class="suggestions">
+            <div class="suggestion">🔍 "Show me red dresses under $60"</div>
+            <div class="suggestion">📦 "Where's my order?"</div>
+            <div class="suggestion">↩️ "I want to return my jacket"</div>
+            <div class="suggestion">🗣️ "Do you have it in blue?"</div>
+        </div>
+
+        <div class="powered-by">
+            <a href="https://jerry.skintlabs.ai">Jerry The Customer Service Bot</a> · A <a href="https://skintlabs.ai">Skint Labs</a> Product
+        </div>
+    </div>
+
+    <!--
+        THIS IS ALL A STORE OWNER NEEDS TO ADD:
+        One script tag with their shop domain and server URL.
+    -->
+    <script>
+        // Load the Jerry widget
+        (function() {
+            var script = document.createElement('script');
+            script.src = '/static/sunsetbot-widget.iife.js';
+            script.setAttribute('data-shop', 'sunsetbot.myshopify.com');
+            script.setAttribute('data-server', window.location.origin);
+            script.setAttribute('data-color', '#c1666b');
+            script.setAttribute('data-tts', 'off');
+            document.body.appendChild(script);
+
+            // When the CTA button is clicked, find and click the widget bubble
+            document.getElementById('open-chat').addEventListener('click', function() {
+                // Wait a moment for widget to load, then click the bubble
+                var tryClick = function(attempts) {
+                    if (attempts <= 0) return;
+                    // The widget renders in a shadow DOM — find the host element
+                    var hosts = document.querySelectorAll('[id^="sunsetbot"], [class*="sunsetbot"], div[style]');
+                    // Try finding the bubble via shadow DOM
+                    var allElements = document.querySelectorAll('*');
+                    for (var i = 0; i < allElements.length; i++) {
+                        var sr = allElements[i].shadowRoot;
+                        if (sr) {
+                            var bubble = sr.querySelector('.sb-bubble');
+                            if (bubble) {
+                                bubble.click();
+                                return;
+                            }
+                        }
+                    }
+                    setTimeout(function() { tryClick(attempts - 1); }, 200);
+                };
+                tryClick(10);
+            });
+        })();
+    </script>
+</body>
+</html>

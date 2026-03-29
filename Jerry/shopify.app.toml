@@ -1,0 +1,26 @@
+client_id = "b323444b85e59301f81c74e556dd7efe"
+name = "Jerry The Customer Service Bot"
+handle = "sunsetbot"
+privacy_policy_url = "https://skintlabs.ai/jerry/privacy"
+support_url = "https://skintlabs.ai/jerry/support"
+application_url = "https://sunsetbot-production.up.railway.app"
+embedded = false
+
+[access_scopes]
+scopes = "read_products,write_products,read_orders,read_customers"
+
+[auth]
+redirect_urls = [
+  "https://sunsetbot-production.up.railway.app/shopify/callback"
+]
+
+[webhooks]
+api_version = "2024-10"
+
+[[webhooks.subscriptions]]
+topics = ["products/create", "products/update", "products/delete", "app/uninstalled", "refunds/create", "orders/create"]
+uri = "https://sunsetbot-production.up.railway.app/shopify/webhooks"
+
+[[webhooks.subscriptions]]
+topics = ["app_subscriptions/activate", "app_subscriptions/cancelled", "app_subscriptions/approaching_capped_amount"]
+uri = "https://sunsetbot-production.up.railway.app/shopify/webhooks"

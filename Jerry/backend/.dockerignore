@@ -1,0 +1,16 @@
+# ============================================================
+# Jerry The Customer Service Bot Backend — .dockerignore
+# ============================================================
+
+venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.env
+.env.*
+sunsetbot.db
+*.db
+test_chat.html
+.DS_Store
+.git/
+.gitignore

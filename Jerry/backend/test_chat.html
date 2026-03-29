@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jerry The Customer Service Bot — Chat Test Page</title>
+  <style>
+    :root {
+      --bg-deep:        #0a0e1a;
+      --bg-card:        #111827;
+      --bg-input:       #1f2937;
+      --border:         #2d3748;
+      --text-primary:   #f9fafb;
+      --text-muted:     #6b7280;
+      --sunset-orange:  #ff6b35;
+      --sunset-gold:    #ffd700;
+      --user-bubble:    #ff6b35;
+      --bot-bubble:     #1e293b;
+      --product-card:   #1e2d45;
+      --radius:         10px;
+      --radius-sm:      6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 0 14px 0;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--sunset-orange), var(--sunset-gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-pill {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .status-pill.connecting { background: #374151; color: var(--text-muted); }
+    .status-pill.connected  { background: #064e3b; color: #34d399; }
+    .status-pill.error      { background: #7f1d1d; color: #f87171; }
+
+    .chat-container {
+      width: 100%;
+      max-width: 680px;
+      height: 560px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+
+    #messages::-webkit-scrollbar { width: 4px; }
+    #messages::-webkit-scrollbar-track { background: transparent; }
+    #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .message-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+    }
+    .message-row.user { align-self: flex-end; align-items: flex-end; }
+    .message-row.bot  { align-self: flex-start; align-items: flex-start; }
+
+    .bubble {
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      line-height: 1.55;
+      word-break: break-word;
+    }
+    .bubble.user {
+      background: var(--user-bubble);
+      color: #fff;
+      border-bottom-right-radius: 3px;
+    }
+    .bubble.bot {
+      background: var(--bot-bubble);
+      color: var(--text-primary);
+      border-bottom-left-radius: 3px;
+      border: 1px solid var(--border);
+    }
+
+    .intent-badge {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      padding-left: 2px;
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 14px;
+      background: var(--bot-bubble);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      border-bottom-left-radius: 3px;
+      align-self: flex-start;
+      width: fit-content;
+    }
+    .typing-dot {
+      width: 6px; height: 6px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: typing-bounce 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing-bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+      30%            { transform: translateY(-5px); opacity: 1; }
+    }
+
+    .products-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-self: flex-start;
+      max-width: 100%;
+    }
+
+    .product-card {
+      background: var(--product-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      width: 170px;
+      flex-shrink: 0;
+    }
+    .product-card:hover { border-color: var(--sunset-orange); transition: border-color 0.2s; }
+
+    .product-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .product-price {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--sunset-orange);
+      margin-bottom: 4px;
+    }
+    .product-stock {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .product-stock.low { color: #f59e0b; }
+
+    .input-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+
+    #messageInput {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 14px;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #messageInput::placeholder { color: var(--text-muted); }
+    #messageInput:focus { border-color: var(--sunset-orange); }
+
+    #sendBtn {
+      background: linear-gradient(135deg, var(--sunset-orange), #e85d04);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    #sendBtn:hover   { opacity: 0.9; }
+    #sendBtn:disabled { opacity: 0.4; cursor: default; }
+
+    .quick-tests {
+      width: 100%;
+      max-width: 680px;
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .quick-btn {
+      background: #1f2937;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .quick-btn:hover { color: var(--text-primary); border-color: var(--sunset-orange); }
+
+    .debug-panel {
+      width: 100%;
+      max-width: 680px;
+      margin-top: 12px;
+      background: #111827;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: "SF Mono", "Fira Code", monospace;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    .debug-panel h4 {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      color: #4b5563;
+    }
+    .log-line { margin-bottom: 2px; }
+    .log-line.info  { color: #6b7280; }
+    .log-line.event { color: #34d399; }
+    .log-line.error { color: #f87171; }
+
+    /* Screen-reader only */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 720px) {
+      body { padding: 10px; justify-content: flex-start; padding-top: 20px; }
+      .chat-container { height: calc(100vh - 200px); min-height: 300px; }
+      .header, .quick-tests, .debug-panel { max-width: 100%; }
+      .product-card { width: 140px; }
+      .products-row { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <span class="header-title">Jerry The Customer Service Bot — Chat Test</span>
+    <span class="status-pill connecting" id="statusPill" role="status" aria-live="polite">Connecting...</span>
+  </div>
+
+  <div class="chat-container" role="main">
+    <div id="messages" role="log" aria-live="polite" aria-label="Chat messages"></div>
+
+    <div class="input-area">
+      <label for="messageInput" class="sr-only">Type your message</label>
+      <input
+        id="messageInput"
+        type="text"
+        placeholder="Ask about products, sizing, shipping..."
+        autocomplete="off"
+        aria-label="Type your message"
+        disabled
+      />
+      <button id="sendBtn" aria-label="Send message" disabled>Send</button>
+    </div>
+  </div>
+
+  <div class="quick-tests" id="quickTests">
+    <span style="font-size:11px;color:#4b5563;align-self:center;margin-right:4px;">Try:</span>
+    <button class="quick-btn" onclick="sendQuick(this)">Red dresses under $70</button>
+    <button class="quick-btn" onclick="sendQuick(this)">Do the boots run true to size?</button>
+    <button class="quick-btn" onclick="sendQuick(this)">What's your return policy?</button>
+    <button class="quick-btn" onclick="sendQuick(this)">I received the wrong item</button>
+    <button class="quick-btn" onclick="sendQuick(this)">Waterproof jacket under $200</button>
+    <button class="quick-btn" onclick="sendQuick(this)">Show me yoga leggings</button>
+    <button class="quick-btn" onclick="sendQuick(this)">Something for the beach</button>
+  </div>
+
+  <div class="debug-panel">
+    <h4>WebSocket Debug Log</h4>
+    <div id="debugLog"></div>
+  </div>
+
+  <script>
+    // =========================================================
+    // CONFIGURATION
+    // =========================================================
+    const STORE_ID   = "demo-store";
+    const SESSION_ID = "test-" + Math.random().toString(36).slice(2, 9);
+    const WS_URL     = `ws://localhost:8000/ws/chat/${STORE_ID}/${SESSION_ID}`;
+
+    const MAX_RECONNECT_ATTEMPTS = 5;
+    let reconnectAttempts = 0;
+    let reconnectDelay = 1000;
+
+    // =========================================================
+    // DOM refs
+    // =========================================================
+    const messagesEl  = document.getElementById("messages");
+    const inputEl     = document.getElementById("messageInput");
+    const sendBtn     = document.getElementById("sendBtn");
+    const statusPill  = document.getElementById("statusPill");
+    const debugLog    = document.getElementById("debugLog");
+
+    let ws = null;
+    let typingEl = null;
+
+    // =========================================================
+    // WebSocket
+    // =========================================================
+    function connect() {
+      debugAppend(`Connecting to ${WS_URL}`, "info");
+      ws = new WebSocket(WS_URL);
+
+      ws.onopen = () => {
+        debugAppend("Connected", "event");
+        setStatus("connected", "Connected");
+        enableInput();
+        reconnectAttempts = 0;
+        reconnectDelay = 1000;
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        debugAppend(`< ${JSON.stringify(data).slice(0, 120)}`, "info");
+        handleServerMessage(data);
+      };
+
+      ws.onerror = () => {
+        debugAppend("WebSocket error — is the server running?", "error");
+        setStatus("error", "Connection error");
+      };
+
+      ws.onclose = () => {
+        disableInput();
+        reconnectAttempts++;
+        if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+          debugAppend("Max reconnect attempts reached.", "error");
+          setStatus("error", "Disconnected");
+          return;
+        }
+        debugAppend(`Connection closed — reconnecting in ${reconnectDelay/1000}s (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`, "info");
+        setStatus("connecting", "Reconnecting...");
+        setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, 10000); // exponential backoff, max 10s
+      };
+    }
+
+    // =========================================================
+    // Handle incoming messages
+    // =========================================================
+    function handleServerMessage(data) {
+      removeTypingIndicator();
+
+      if (data.type === "typing") {
+        showTypingIndicator();
+        return;
+      }
+
+      if (data.type === "error") {
+        appendBotMessage(`Warning: ${data.error}`, "error", []);
+        return;
+      }
+
+      if (data.type === "message") {
+        appendBotMessage(data.text, data.intent, data.products || []);
+        return;
+      }
+    }
+
+    // =========================================================
+    // Send a message
+    // =========================================================
+    function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+      appendUserMessage(text);
+      ws.send(JSON.stringify({ message: text }));
+      inputEl.value = "";
+      sendBtn.disabled = true;
+      inputEl.focus();
+    }
+
+    function sendQuick(btn) {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      inputEl.value = btn.textContent;
+      sendMessage();
+    }
+
+    // =========================================================
+    // DOM helpers — messages
+    // =========================================================
+    function appendUserMessage(text) {
+      const row = document.createElement("div");
+      row.className = "message-row user";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble user";
+      bubble.textContent = text;
+
+      row.appendChild(bubble);
+      messagesEl.appendChild(row);
+      scrollToBottom();
+    }
+
+    function appendBotMessage(text, intent, products) {
+      const row = document.createElement("div");
+      row.className = "message-row bot";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble bot";
+      bubble.textContent = text;
+      row.appendChild(bubble);
+
+      if (intent && intent !== "error") {
+        const badge = document.createElement("div");
+        badge.className = "intent-badge";
+        badge.textContent = `intent: ${intent}`;
+        row.appendChild(badge);
+      }
+
+      messagesEl.appendChild(row);
+
+      if (products && products.length > 0) {
+        const productsRow = document.createElement("div");
+        productsRow.className = "products-row";
+
+        products.forEach(p => {
+          const card = document.createElement("div");
+          card.className = "product-card";
+
+          const lowStock = p.inventory > 0 && p.inventory < 10;
+
+          card.innerHTML = `
+            <div class="product-title">${escapeHtml(p.title)}</div>
+            <div class="product-price">$${p.price.toFixed(2)}</div>
+            <div class="product-stock ${lowStock ? "low" : ""}">
+              ${lowStock ? `Only ${p.inventory} left` : p.inventory > 0 ? "In stock" : "Out of stock"}
+            </div>
+          `;
+
+          if (p.url) {
+            card.style.cursor = "pointer";
+            card.onclick = () => window.open(p.url, "_blank");
+          }
+
+          productsRow.appendChild(card);
+        });
+
+        messagesEl.appendChild(productsRow);
+      }
+
+      scrollToBottom();
+      sendBtn.disabled = false;
+    }
+
+    function showTypingIndicator() {
+      removeTypingIndicator();
+      typingEl = document.createElement("div");
+      typingEl.className = "typing-indicator";
+      typingEl.innerHTML = `
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      `;
+      messagesEl.appendChild(typingEl);
+      scrollToBottom();
+    }
+
+    function removeTypingIndicator() {
+      if (typingEl) {
+        typingEl.remove();
+        typingEl = null;
+      }
+    }
+
+    function scrollToBottom() {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    // =========================================================
+    // DOM helpers — UI state
+    // =========================================================
+    function enableInput() {
+      inputEl.disabled  = false;
+      sendBtn.disabled  = false;
+      inputEl.focus();
+    }
+
+    function disableInput() {
+      inputEl.disabled = true;
+      sendBtn.disabled = true;
+    }
+
+    function setStatus(state, label) {
+      statusPill.className = `status-pill ${state}`;
+      statusPill.textContent = label;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // =========================================================
+    // Debug log
+    // =========================================================
+    function debugAppend(msg, type = "info") {
+      const line = document.createElement("div");
+      line.className = `log-line ${type}`;
+      const now = new Date().toLocaleTimeString();
+      line.textContent = `[${now}] ${msg}`;
+      debugLog.appendChild(line);
+      debugLog.scrollTop = debugLog.scrollHeight;
+    }
+
+    // =========================================================
+    // Event listeners
+    // =========================================================
+    sendBtn.addEventListener("click", sendMessage);
+
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    inputEl.addEventListener("input", () => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        sendBtn.disabled = !inputEl.value.trim();
+      }
+    });
+
+    // =========================================================
+    // Connect
+    // =========================================================
+    connect();
+  </script>
+</body>
+</html>

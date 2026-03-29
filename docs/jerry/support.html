@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support — Jerry by Skint Labs</title>
+    <meta name="description" content="Support and FAQ for Jerry, the AI customer service bot for Shopify by Skint Labs.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0c0b0a;
+            --bg-subtle: #141210;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --border: rgba(212, 160, 64, 0.2);
+            --border-solid: #2e2a25;
+            --text: #d4b896;
+            --text-bright: #ede8e0;
+            --text-muted: #8a7d6e;
+            --accent-terracotta: #c1666b;
+            --accent-gold: #d4a040;
+            --gradient-golden: linear-gradient(135deg, #c1666b 0%, #d4a040 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: var(--accent-gold); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--accent-terracotta); }
+
+        /* ── NAV ── */
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(12, 11, 10, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-solid);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .nav-brand-text {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            background: var(--gradient-golden);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .nav-back {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .nav-back:hover { color: var(--text-bright); }
+        .nav-back svg { width: 14px; height: 14px; }
+
+        /* ── HERO ── */
+        .hero {
+            padding: 120px 32px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212, 160, 64, 0.07) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .hero-eyebrow {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+            padding: 6px 16px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+        }
+        .hero-title {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-weight: 900;
+            font-size: clamp(2.4rem, 6vw, 4rem);
+            color: var(--text-bright);
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+        .hero-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        /* ── CONTENT ── */
+        .content {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+
+        /* ── FAQ ── */
+        .faq-intro {
+            font-size: 0.96rem;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            text-align: center;
+        }
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 48px;
+        }
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .faq-question {
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 22px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            text-align: left;
+            color: var(--text-bright);
+            font-family: 'Noto Serif', Georgia, serif;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+        .faq-question:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .faq-question[aria-expanded="true"] {
+            color: var(--accent-gold);
+        }
+        .faq-icon {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            color: var(--accent-gold);
+            transition: transform 0.25s ease;
+        }
+        .faq-question[aria-expanded="true"] .faq-icon {
+            transform: rotate(45deg);
+        }
+        .faq-answer {
+            display: none;
+            padding: 0 28px 22px;
+            font-size: 0.96rem;
+            line-height: 1.75;
+            color: var(--text);
+            border-top: 1px solid var(--border);
+        }
+        .faq-answer.open {
+            display: block;
+        }
+
+        /* ── SECTION ── */
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 36px 40px;
+            margin-bottom: 20px;
+        }
+        .section-heading {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-bright);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-heading::before {
+            content: '';
+            display: block;
+            width: 3px;
+            height: 20px;
+            background: var(--gradient-golden);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .section p {
+            margin-bottom: 12px;
+            font-size: 0.96rem;
+            line-height: 1.75;
+        }
+        .section p:last-child { margin-bottom: 0; }
+
+        /* ── CONTACT CARD ── */
+        .contact-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .contact-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--gradient-golden);
+        }
+        .contact-card h2 {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--text-bright);
+            margin-bottom: 12px;
+        }
+        .contact-card p {
+            font-size: 0.96rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        .contact-email-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--gradient-golden);
+            color: #0c0b0a;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .contact-email-link:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            color: #0c0b0a;
+        }
+        .response-note {
+            margin-top: 16px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border-solid);
+            padding: 36px 32px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+        footer a { color: var(--text-muted); }
+        footer a:hover { color: var(--text-bright); }
+        .footer-inner {
+            max-width: 780px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .footer-brand {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-weight: 900;
+            font-size: 0.95rem;
+            background: var(--gradient-golden);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 600px) {
+            .nav { padding: 0 20px; }
+            .hero { padding: 100px 20px 48px; }
+            .faq-question { padding: 18px 20px; font-size: 0.93rem; }
+            .faq-answer { padding: 0 20px 18px; }
+            .section { padding: 24px 20px; }
+            .contact-card { padding: 28px 20px; }
+            .content { padding: 0 16px 60px; }
+            footer { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <a href="https://jerry.skintlabs.ai" class="nav-brand">
+            <span class="nav-brand-text">Jerry</span>
+        </a>
+        <a href="https://jerry.skintlabs.ai" class="nav-back">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 12L6 8l4-4"/>
+            </svg>
+            Back to jerry.skintlabs.ai
+        </a>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <span class="hero-eyebrow">Help Center</span>
+        <h1 class="hero-title">Support</h1>
+        <p class="hero-subtitle">Answers to common questions and ways to get in touch.</p>
+    </section>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+        <!-- FAQ -->
+        <p class="faq-intro">Frequently asked questions about Jerry.</p>
+
+        <div class="faq-list">
+
+            <div class="faq-item">
+                <button class="faq-question" aria-expanded="false" onclick="toggleFaq(this)">
+                    How do I install Jerry?
+                    <svg class="faq-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="10" y1="4" x2="10" y2="16"/>
+                        <line x1="4" y1="10" x2="16" y2="10"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    Install from the Shopify App Store. Jerry will sync your product catalog automatically.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" aria-expanded="false" onclick="toggleFaq(this)">
+                    How long does setup take?
+                    <svg class="faq-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="10" y1="4" x2="10" y2="16"/>
+                        <line x1="4" y1="10" x2="16" y2="10"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    Under 5 minutes. Jerry is live the moment you embed the widget in your theme.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" aria-expanded="false" onclick="toggleFaq(this)">
+                    What data does Jerry access?
+                    <svg class="faq-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="10" y1="4" x2="10" y2="16"/>
+                        <line x1="4" y1="10" x2="16" y2="10"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    Jerry reads your product catalog and order data to answer customer questions. It never writes or modifies your orders.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" aria-expanded="false" onclick="toggleFaq(this)">
+                    How do I cancel?
+                    <svg class="faq-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="10" y1="4" x2="10" y2="16"/>
+                        <line x1="4" y1="10" x2="16" y2="10"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    You can cancel anytime from your Shopify admin under Apps &amp; Sales Channels. Your data is retained for 90 days then deleted.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" aria-expanded="false" onclick="toggleFaq(this)">
+                    My widget isn't showing up — what do I do?
+                    <svg class="faq-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="10" y1="4" x2="10" y2="16"/>
+                        <line x1="4" y1="10" x2="16" y2="10"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    Check that the embed code is in your theme's layout file. Contact support if the issue persists.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" aria-expanded="false" onclick="toggleFaq(this)">
+                    Does Jerry support multiple languages?
+                    <svg class="faq-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="10" y1="4" x2="10" y2="16"/>
+                        <line x1="4" y1="10" x2="16" y2="10"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    Yes — Jerry responds in 50+ languages automatically.
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CONTACT -->
+        <div class="contact-card">
+            <h2>Still need help?</h2>
+            <p>Can't find the answer you're looking for? Send us an email and we'll get back to you within 24 hours.</p>
+            <a href="mailto:info@skintlabs.ai" class="contact-email-link">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="3" width="14" height="10" rx="2"/>
+                    <path d="M1 5l7 5 7-5"/>
+                </svg>
+                info@skintlabs.ai
+            </a>
+            <p class="response-note">Typical response time: within 24 hours on business days.</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-heading">About Jerry</h2>
+            <p>Jerry is an AI-powered customer service bot built for Shopify merchants. It syncs with your product catalog and order data to answer shopper questions instantly — reducing support tickets and improving the buying experience.</p>
+            <p>Built by <a href="https://skintlabs.ai">Skint Labs</a>, Melbourne, Australia. &nbsp;<a href="https://skintlabs.ai/jerry/privacy">Privacy Policy</a>.</p>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-inner">
+            <span class="footer-brand">Jerry by Skint Labs</span>
+            <div class="footer-links">
+                <a href="https://jerry.skintlabs.ai">Home</a>
+                <a href="https://skintlabs.ai/jerry/privacy">Privacy Policy</a>
+                <a href="https://skintlabs.ai/jerry/support">Support</a>
+                <a href="https://skintlabs.ai">Skint Labs</a>
+            </div>
+            <p>&copy; 2026 Skint Labs. Melbourne, Australia.</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleFaq(btn) {
+            const isOpen = btn.getAttribute('aria-expanded') === 'true';
+            // Close all
+            document.querySelectorAll('.faq-question').forEach(function(q) {
+                q.setAttribute('aria-expanded', 'false');
+                q.nextElementSibling.classList.remove('open');
+            });
+            // Open clicked if it was closed
+            if (!isOpen) {
+                btn.setAttribute('aria-expanded', 'true');
+                btn.nextElementSibling.classList.add('open');
+            }
+        }
+    </script>
+
+</body>
+</html>

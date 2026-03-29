@@ -1,0 +1,43 @@
+# ============================================================
+# Jerry The Customer Service Bot — .gitignore
+# ============================================================
+
+# Environment & secrets
+.env
+.env.local
+.env.production
+!.env.example
+
+# Python
+backend/venv/
+backend/**/__pycache__/
+backend/__pycache__/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Database (local SQLite)
+backend/sunsetbot.db
+backend/*.db
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log

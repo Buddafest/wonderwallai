@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jerry The Customer Service Bot — AI Customer Service for Shopify</title>
+    <meta name="description" content="Jerry The Customer Service Bot is an AI-powered customer service assistant built for Shopify. Semantic product search, order tracking, returns, voice chat, and revenue attribution — 24/7.">
+    <meta property="og:title" content="Jerry The Customer Service Bot — AI Customer Service for Shopify">
+    <meta property="og:description" content="AI customer service for Shopify. Semantic product search, order tracking, returns, voice chat, and revenue attribution — 24/7.">
+    <meta property="og:image" content="https://jerry.skintlabs.ai/og-image.png">
+    <meta property="og:url" content="https://jerry.skintlabs.ai">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Jerry The Customer Service Bot — AI Customer Service for Shopify">
+    <meta name="twitter:image" content="https://jerry.skintlabs.ai/og-image.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --mustard: #d4a040;
+            --terracotta: #c1666b;
+            --warm-beige: #d4b896;
+            --chocolate: #4a4032;
+            --bg: #0c0b0a;
+            --bg-subtle: #141210;
+            --bg-card: #1c1a17;
+            --bg-card-hover: #252320;
+            --border: #2e2a25;
+            --border-hover: #3d3830;
+            --text: #d4b896;
+            --text-secondary: #c4a882;
+            --text-muted: #8a7d6e;
+            --text-bright: #ede8e0;
+            --primary: #c1666b;
+            --primary-hover: #d07478;
+            --primary-glow: rgba(193, 102, 107, 0.12);
+            --accent: #d4a040;
+            --accent-hover: #e0b050;
+            --gradient-warm: linear-gradient(135deg, #c1666b 0%, #d4a040 100%);
+            --gradient-text: linear-gradient(135deg, #c1666b 0%, #d4a040 50%, #e9c46a 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            width: 100%;
+        }
+        h1, h2, h3 {
+            font-family: 'Noto Serif', Georgia, serif;
+            color: var(--text-bright);
+        }
+        a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--primary-hover); }
+        .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+        .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(12, 11, 10, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        nav .container { display: flex; justify-content: space-between; align-items: center; height: 64px; }
+        .logo { font-family: 'Noto Serif', Georgia, serif; font-size: 1.3rem; font-weight: 900; letter-spacing: -0.02em; }
+        .logo .logo-jerry { color: var(--accent); }
+        .logo .logo-sub { color: var(--primary); font-size: 0.65em; font-weight: 700; }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .skint-badge {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .skint-badge:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        .nav-links { display: flex; gap: 28px; align-items: center; }
+        .nav-links a { color: var(--text-secondary); font-size: 0.88rem; font-weight: 500; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-cta {
+            background: var(--primary) !important; color: var(--text-bright) !important;
+            -webkit-text-fill-color: var(--text-bright) !important;
+            padding: 8px 22px; border-radius: 6px; font-weight: 600; font-size: 0.85rem;
+            transition: all 0.2s; border: 1px solid var(--primary);
+        }
+        .nav-cta:hover { background: var(--primary-hover) !important; transform: translateY(-1px); }
+
+        /* ── HERO — split layout (distinct from WonderwallAi centered hero) ── */
+        .hero {
+            padding: 140px 0 80px;
+            position: relative;
+            overflow: hidden;
+            max-width: 100vw;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; top: 0; right: 0; width: 50%; height: 700px;
+            background: radial-gradient(circle, rgba(193,102,107,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: center;
+        }
+        .hero-text h1 {
+            font-size: clamp(2.4rem, 5vw, 3.6rem);
+            font-weight: 900; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 20px;
+        }
+        .hero-text .gradient-text {
+            background: var(--gradient-text);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-text p {
+            font-size: 1.1rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 32px; max-width: 480px;
+        }
+        .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+        .btn-primary {
+            background: var(--primary); color: var(--text-bright); padding: 16px 36px;
+            border-radius: 6px; font-weight: 700; font-size: 1rem; border: none;
+            cursor: pointer; transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 24px rgba(193,102,107,0.25);
+            text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.88rem;
+        }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); color: var(--text-bright); box-shadow: 0 6px 32px rgba(193,102,107,0.35); }
+        .btn-secondary {
+            background: transparent; color: var(--warm-beige); padding: 16px 36px;
+            border-radius: 6px; font-weight: 600; font-size: 0.88rem;
+            border: 1px solid var(--chocolate); cursor: pointer; transition: all 0.25s;
+            display: inline-flex; align-items: center; gap: 8px;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); background: rgba(193,102,107,0.06); }
+
+        /* Mock chat widget in hero */
+        .hero-chat {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+            transform: perspective(800px) rotateY(-3deg);
+            transition: transform 0.4s;
+        }
+        .hero-chat:hover { transform: perspective(800px) rotateY(0deg); }
+        .chat-header {
+            background: var(--primary);
+            padding: 16px 20px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .chat-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+        .chat-header-text { color: var(--text-bright); }
+        .chat-header-text strong { display: block; font-size: 0.95rem; }
+        .chat-header-text span { font-size: 0.75rem; opacity: 0.8; }
+        .chat-messages { padding: 20px; display: flex; flex-direction: column; gap: 12px; min-height: 280px; }
+        .msg {
+            max-width: 85%; padding: 12px 16px; border-radius: 16px;
+            font-size: 0.88rem; line-height: 1.5;
+        }
+        .msg-user {
+            align-self: flex-end; background: var(--primary); color: var(--text-bright);
+            border-bottom-right-radius: 4px;
+        }
+        .msg-bot {
+            align-self: flex-start; background: var(--bg-card-hover); color: var(--text);
+            border: 1px solid var(--border); border-bottom-left-radius: 4px;
+        }
+        .msg-product {
+            align-self: flex-start; background: var(--bg-card-hover);
+            border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px; max-width: 85%;
+        }
+        .msg-product-name { font-size: 0.85rem; font-weight: 600; color: var(--text-bright); }
+        .msg-product-price { font-size: 0.9rem; color: var(--accent); font-weight: 700; font-family: 'Noto Serif', serif; }
+        .msg-product-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+        .chat-input-bar {
+            padding: 12px 16px; border-top: 1px solid var(--border);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .chat-input-bar input {
+            flex: 1; background: transparent; border: none;
+            color: var(--text-muted); font-size: 0.85rem; outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+        .chat-input-bar button {
+            background: var(--primary); border: none; color: var(--text-bright);
+            width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 0.9rem;
+        }
+
+        /* ── STATS STRIP ── */
+        .page-wrap {
+            width: 100%; max-width: 100vw; overflow-x: hidden;
+        }
+        .stats-strip {
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-subtle);
+            overflow: hidden;
+        }
+        .stats-inner {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 0; padding: 0;
+        }
+        .stat-block {
+            padding: 32px 24px; text-align: center; position: relative;
+        }
+        .stat-block::after {
+            content: ''; position: absolute; right: 0; top: 20%; height: 60%;
+            width: 1px; background: var(--border);
+        }
+        .stat-block:last-child::after { display: none; }
+        .stat-num {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 2.4rem; font-weight: 900; color: var(--accent);
+            line-height: 1; margin-bottom: 6px;
+        }
+        .stat-label {
+            font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.12em; font-weight: 600;
+        }
+
+        /* ── SECTIONS ── */
+        section { padding: 100px 0; }
+        .section-label {
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.15em;
+            color: var(--primary); font-weight: 600; margin-bottom: 12px;
+        }
+        h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 16px;
+        }
+        .section-desc {
+            font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; line-height: 1.7;
+        }
+
+        /* ── CAPABILITIES — alternating rows (distinct from card grid) ── */
+        .capability {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+            padding: 64px 0; border-bottom: 1px solid var(--border);
+        }
+        .capability:last-child { border-bottom: none; }
+        .capability.reverse .cap-visual { order: -1; }
+        .cap-content .cap-tag {
+            display: inline-block; font-size: 0.68rem; text-transform: uppercase;
+            letter-spacing: 0.15em; font-weight: 700; color: var(--accent);
+            background: none; border: none;
+            padding: 0 0 0 12px; border-left: 3px solid var(--accent); margin-bottom: 16px;
+        }
+        .cap-content h3 {
+            font-size: 1.6rem; font-weight: 900; margin-bottom: 12px; line-height: 1.2;
+        }
+        .cap-content p {
+            font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 16px;
+        }
+        .cap-bullets { list-style: none; }
+        .cap-bullets li {
+            font-size: 0.88rem; color: var(--text-secondary); padding: 6px 0;
+            display: flex; align-items: flex-start; gap: 10px;
+        }
+        .cap-bullets .dot {
+            width: 6px; height: 6px; border-radius: 50%; background: var(--primary);
+            flex-shrink: 0; margin-top: 8px;
+        }
+        .cap-visual {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 32px; position: relative; overflow: hidden;
+        }
+        .cap-visual::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: var(--gradient-warm);
+        }
+        .cap-visual-label {
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--text-muted); font-weight: 600; margin-bottom: 16px;
+        }
+        .cap-example {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+            color: var(--text-secondary); line-height: 1.8;
+        }
+        .cap-example .user { color: var(--primary); }
+        .cap-example .bot { color: var(--accent); }
+        .cap-example .label { color: var(--text-muted); font-size: 0.72rem; }
+
+        /* ── FULL FEATURE LIST ── */
+        .all-features {
+            background: var(--bg-subtle);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .features-columns {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 48px;
+        }
+        .feature-group h3 {
+            font-size: 1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+        }
+        .feature-group h3 .fg-icon {
+            width: 32px; height: 32px; border-radius: 8px; display: flex;
+            align-items: center; justify-content: center; font-size: 1rem;
+            background: var(--primary-glow); flex-shrink: 0;
+        }
+        .feature-group ul { list-style: none; }
+        .feature-group ul li {
+            padding: 8px 0; font-size: 0.88rem; color: var(--text-secondary);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px;
+        }
+        .feature-group ul li:last-child { border-bottom: none; }
+        .feature-group ul li .check { color: var(--accent); font-size: 0.9rem; flex-shrink: 0; }
+
+        /* ── HOW IT WORKS — horizontal timeline (distinct from WonderwallAi numbered list) ── */
+        .timeline {
+            display: flex; gap: 0; margin-top: 56px; position: relative;
+        }
+        .timeline::before {
+            content: ''; position: absolute; top: 28px; left: 10%; right: 10%;
+            height: 2px; background: var(--border);
+        }
+        .tl-step {
+            flex: 1; text-align: center; position: relative; padding: 0 16px;
+        }
+        .tl-dot {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: var(--bg-card); border: 2px solid var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px; position: relative; z-index: 1;
+            font-family: 'Noto Serif', Georgia, serif; font-size: 1.2rem; font-weight: 900;
+            color: var(--accent);
+        }
+        .tl-step h3 { font-size: 1.1rem; margin-bottom: 8px; }
+        .tl-step p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+
+        /* ── SECURITY ── */
+        .security {
+            background: var(--bg-subtle);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .security-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 32px;
+        }
+        .security-item {
+            display: flex; align-items: flex-start; gap: 14px; padding: 20px;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+        }
+        .security-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: rgba(74,64,50,0.4); display: flex; align-items: center;
+            justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+        }
+        .security-item strong { display: block; font-size: 0.92rem; margin-bottom: 4px; color: var(--text-bright); }
+        .security-item span { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+
+        /* ── PRICING ── */
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 24px; margin-top: 48px; max-width: 1000px;
+            margin-left: auto; margin-right: auto;
+        }
+        .price-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 36px; position: relative; transition: transform 0.2s;
+        }
+        .price-card:hover { transform: translateY(-3px); }
+        .price-card.featured {
+            border-color: var(--primary);
+            box-shadow: 0 0 40px var(--primary-glow);
+        }
+        .price-name { font-family: 'Noto Serif', Georgia, serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+        .price-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+        .price-amount {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 2.8rem; font-weight: 900; color: var(--accent);
+        }
+        .price-amount span { font-size: 1rem; color: var(--text-muted); font-weight: 400; }
+        .price-period { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; }
+        .price-features { list-style: none; margin-bottom: 28px; }
+        .price-features li {
+            padding: 8px 0; font-size: 0.9rem; color: var(--text-secondary);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px;
+        }
+        .price-features li:last-child { border-bottom: none; }
+        .price-features .check { color: var(--accent); }
+        .btn-price {
+            display: block; width: 100%; text-align: center; padding: 14px;
+            border-radius: 6px; font-weight: 700; font-size: 0.88rem;
+            cursor: pointer; transition: all 0.25s;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .btn-price-primary {
+            background: var(--primary); color: var(--text-bright); border: none;
+            box-shadow: 0 4px 20px rgba(193,102,107,0.2);
+        }
+        .btn-price-primary:hover { background: var(--primary-hover); color: var(--text-bright); }
+        .btn-price-secondary {
+            background: transparent; color: var(--warm-beige); border: 1px solid var(--chocolate);
+        }
+        .btn-price-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ── EARLY BIRD ── */
+        .early-bird-banner {
+            background: linear-gradient(135deg, rgba(212,160,64,0.08), rgba(193,102,107,0.08));
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 20px 28px;
+            margin-bottom: 32px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .early-bird-inner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .early-bird-icon { font-size: 2rem; }
+        .early-bird-text { text-align: left; }
+        .early-bird-text strong { color: var(--accent); font-size: 1.1rem; display: block; }
+        .early-bird-text span { color: var(--text-secondary); font-size: 0.9rem; }
+        .early-bird-counter { text-align: center; min-width: 80px; }
+        .early-bird-count {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent);
+            display: block;
+            line-height: 1;
+        }
+        .early-bird-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+        .price-original {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            display: none;
+        }
+        .price-discounted { display: none; }
+        .eb-badge {
+            position: absolute;
+            top: -12px;
+            right: 16px;
+            background: var(--accent);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: none;
+        }
+
+        /* ── CTA ── */
+        .cta-section {
+            text-align: center; padding: 120px 0; position: relative;
+            overflow: hidden;
+        }
+        .cta-section::before {
+            content: ''; position: absolute; bottom: 0; left: 50%;
+            transform: translateX(-50%); width: 100%; max-width: 600px; height: 600px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* ── FOOTER ── */
+        footer { border-top: 1px solid var(--border); padding: 48px 0; }
+        .footer-content {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 24px;
+        }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-links a { color: var(--text-muted); font-size: 0.85rem; }
+        .footer-links a:hover { color: var(--text); }
+        .footer-copy { font-size: 0.8rem; color: var(--text-muted); }
+        .footer-shield { font-size: 0.75rem; color: var(--terracotta); display: flex; align-items: center; gap: 6px; }
+
+        /* ── MOBILE ── */
+        @media (max-width: 900px) {
+            .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+            .hero-chat { transform: none; max-width: 100%; margin: 0 auto; }
+            .hero-text h1 { font-size: 2rem; }
+            .hero-text p { font-size: 1rem; }
+            .hero-buttons { flex-direction: column; align-items: stretch; }
+            .btn-primary, .btn-secondary { text-align: center; justify-content: center; padding: 14px 24px; font-size: 0.92rem; }
+            .capability { grid-template-columns: 1fr; gap: 32px; }
+            .capability.reverse .cap-visual { order: 0; }
+            .cap-content h3 { font-size: 1.3rem; }
+            .cap-visual { padding: 20px; }
+            .cap-example { font-size: 0.75rem; word-break: break-word; }
+            .features-columns { grid-template-columns: 1fr; }
+            .security-grid { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+            .timeline { flex-direction: column; gap: 32px; }
+            .timeline::before { display: none; }
+            section { padding: 64px 0; }
+            h2 { font-size: 1.8rem; }
+        }
+        @media (max-width: 768px) {
+            .nav-links a:not(.nav-cta) { display: none; }
+            .nav-cta { padding: 6px 16px; font-size: 0.78rem; }
+            .logo { font-size: 1.1rem; }
+            .logo .logo-sub { font-size: 0.6em; }
+            .stats-inner { grid-template-columns: repeat(2, 1fr); }
+            .stat-block { padding: 20px 16px; }
+            .stat-block::after { display: none; }
+            .stat-block { border-bottom: 1px solid var(--border); }
+            .stat-num { font-size: 1.8rem; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 100%; }
+            .price-card { padding: 28px 20px; }
+            .footer-content { flex-direction: column; text-align: center; }
+            .footer-links { justify-content: center; }
+            .container { padding: 0 16px; }
+            .hero { padding: 110px 0 60px; }
+            .cta-section { padding: 80px 0; }
+            .msg { font-size: 0.82rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-wrap">
+    <!-- NAV -->
+    <nav>
+        <div class="container">
+            <div class="nav-brand">
+                <div class="logo">
+                    <span class="logo-jerry">Jerry</span> <span class="logo-sub">The Customer Service Bot</span>
+                </div>
+                <a href="https://skintlabs.ai" class="skint-badge" target="_blank" rel="noopener">by Skint Labs</a>
+            </div>
+            <div class="nav-links">
+                <a href="#capabilities">Capabilities</a>
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#pricing">Pricing</a>
+                <a class="nav-cta" href="#pricing">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO — split layout -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-grid fade-in">
+                <div class="hero-text">
+                    <h1>
+                        Meet <span class="gradient-text">Jerry The Customer Service Bot</span>
+                    </h1>
+                    <p>
+                        The AI assistant that knows every product in your Shopify store, tracks every order,
+                        handles returns, speaks 50+ languages, and never takes a day off.
+                    </p>
+                    <div class="hero-buttons">
+                        <a class="btn-primary" href="https://sunsetbot-production.up.railway.app/static/demo.html" target="_blank" rel="noopener">Try Free Demo &rarr;</a>
+                    </div>
+                </div>
+                <div class="hero-chat">
+                    <div class="chat-header">
+                        <div class="chat-avatar">&#129302;</div>
+                        <div class="chat-header-text">
+                            <strong>Jerry The Customer Service Bot</strong>
+                            <span>Online &middot; Typically replies instantly</span>
+                        </div>
+                    </div>
+                    <div class="chat-messages">
+                        <div class="msg msg-user">Do you have any red dresses under $60?</div>
+                        <div class="msg msg-bot">I found 3 red dresses in your price range! Here's my top pick:</div>
+                        <div class="msg-product">
+                            <div class="msg-product-name">Sunset Midi Wrap Dress</div>
+                            <div class="msg-product-price">$54.99</div>
+                            <div class="msg-product-desc">Crimson red &middot; XS-XL &middot; Free shipping over $50</div>
+                        </div>
+                        <div class="msg msg-user">What about in a size medium?</div>
+                        <div class="msg msg-bot">The medium is in stock and ready to ship! Would you like me to help with anything else?</div>
+                    </div>
+                    <div class="chat-input-bar">
+                        <input type="text" placeholder="Ask Jerry anything..." disabled>
+                        <button>&#8593;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="stats-strip">
+        <div class="container">
+            <div class="stats-inner fade-in">
+                <div class="stat-block">
+                    <div class="stat-num">&lt;2s</div>
+                    <div class="stat-label">Response Time</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-num">24/7</div>
+                    <div class="stat-label">Always On</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-num">50+</div>
+                    <div class="stat-label">Languages</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-num">100%</div>
+                    <div class="stat-label">Shopify Native</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- CAPABILITIES — detailed alternating rows -->
+    <section id="capabilities">
+        <div class="container">
+            <div class="section-label">What Jerry The Customer Service Bot Can Do</div>
+            <h2>A complete AI employee, <span class="gradient-text">not a chatbot</span></h2>
+            <p class="section-desc">
+                Jerry The Customer Service Bot doesn't use scripted responses. It understands natural language, searches your real product data, and gives customers genuinely helpful answers.
+            </p>
+
+            <!-- Capability 1: Semantic Product Search -->
+            <div class="capability fade-in">
+                <div class="cap-content">
+                    <div class="cap-tag">Core Capability</div>
+                    <h3>Semantic Product Search</h3>
+                    <p>
+                        Jerry The Customer Service Bot syncs your entire Shopify catalog and builds a semantic understanding of every product. Customers can search using natural language, not just keywords.
+                    </p>
+                    <ul class="cap-bullets">
+                        <li><span class="dot"></span>Understands vague queries: "something for the beach under $50"</li>
+                        <li><span class="dot"></span>Extracts price, size, colour, material, and occasion automatically</li>
+                        <li><span class="dot"></span>Category intelligence: "shoes" also finds boots, sneakers, sandals</li>
+                        <li><span class="dot"></span>Follow-up detection: "show me more like that" continues the search</li>
+                        <li><span class="dot"></span>Real-time inventory — only recommends products that are in stock</li>
+                    </ul>
+                </div>
+                <div class="cap-visual">
+                    <div class="cap-visual-label">Example Conversation</div>
+                    <div class="cap-example">
+                        <span class="label">Customer:</span><br>
+                        <span class="user">"I need a warm jacket for hiking, nothing too expensive"</span><br><br>
+                        <span class="label">Jerry The Customer Service Bot:</span><br>
+                        <span class="bot">"I found 4 jackets perfect for hiking! Here's my top pick — the Alpine Trail Fleece at $89. It's water-resistant, rated to -5&deg;C, and available in your size. Want to see the others?"</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capability 2: Order Tracking -->
+            <div class="capability reverse fade-in">
+                <div class="cap-content">
+                    <div class="cap-tag">Post-Purchase</div>
+                    <h3>Order Tracking &amp; WISMO</h3>
+                    <p>
+                        "Where Is My Order?" is the #1 support query for e-commerce. Jerry The Customer Service Bot handles it instantly by connecting directly to your Shopify orders, shipping data, and fulfilment status.
+                    </p>
+                    <ul class="cap-bullets">
+                        <li><span class="dot"></span>Real-time order status from Shopify Admin API</li>
+                        <li><span class="dot"></span>Shipping carrier tracking with delivery estimates</li>
+                        <li><span class="dot"></span>Proactive updates when fulfilment status changes</li>
+                        <li><span class="dot"></span>Handles multi-item orders with partial shipments</li>
+                        <li><span class="dot"></span>No more "let me check" — customers get answers in seconds</li>
+                    </ul>
+                </div>
+                <div class="cap-visual">
+                    <div class="cap-visual-label">Example Conversation</div>
+                    <div class="cap-example">
+                        <span class="label">Customer:</span><br>
+                        <span class="user">"Where's my order #4821?"</span><br><br>
+                        <span class="label">Jerry The Customer Service Bot:</span><br>
+                        <span class="bot">"Your order #4821 shipped on March 5 via USPS. Tracking shows it's currently in transit and estimated delivery is March 10. Here's your tracking link."</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capability 3: Returns & Refunds -->
+            <div class="capability fade-in">
+                <div class="cap-content">
+                    <div class="cap-tag">Support Automation</div>
+                    <h3>Returns, Refunds &amp; Policy Queries</h3>
+                    <p>
+                        Jerry The Customer Service Bot knows your store's return policy, checks eligibility windows, and guides customers through the process — reducing your support team's workload dramatically.
+                    </p>
+                    <ul class="cap-bullets">
+                        <li><span class="dot"></span>Explains your return policy in plain language</li>
+                        <li><span class="dot"></span>Checks if items are within the return window</li>
+                        <li><span class="dot"></span>Initiates returns and refunds through Shopify</li>
+                        <li><span class="dot"></span>Handles exchanges and store credit options</li>
+                        <li><span class="dot"></span>Processes refund webhooks and notifies customers</li>
+                    </ul>
+                </div>
+                <div class="cap-visual">
+                    <div class="cap-visual-label">Example Conversation</div>
+                    <div class="cap-example">
+                        <span class="label">Customer:</span><br>
+                        <span class="user">"I want to return the blue sweater from last week"</span><br><br>
+                        <span class="label">Jerry The Customer Service Bot:</span><br>
+                        <span class="bot">"I can see your order from March 2. The blue sweater is within your 30-day return window. Would you like a full refund to your original payment method, or would you prefer store credit?"</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capability 4: Voice + Multilingual -->
+            <div class="capability reverse fade-in">
+                <div class="cap-content">
+                    <div class="cap-tag">Accessibility</div>
+                    <h3>Voice Chat &amp; 50+ Languages</h3>
+                    <p>
+                        Jerry The Customer Service Bot speaks to every customer in their language. Built-in voice chat uses the browser's Web Speech API — no external services, no extra cost, no latency.
+                    </p>
+                    <ul class="cap-bullets">
+                        <li><span class="dot"></span>Speech-to-text: customers can talk instead of type</li>
+                        <li><span class="dot"></span>Text-to-speech: Jerry reads responses aloud</li>
+                        <li><span class="dot"></span>50+ languages supported out of the box</li>
+                        <li><span class="dot"></span>Automatic language detection — no settings to change</li>
+                        <li><span class="dot"></span>Zero external API calls — runs entirely in the browser</li>
+                    </ul>
+                </div>
+                <div class="cap-visual">
+                    <div class="cap-visual-label">Voice + Multilingual</div>
+                    <div class="cap-example">
+                        <span class="label">Customer (Spanish):</span><br>
+                        <span class="user">"&iquest;Tienen vestidos rojos?"</span><br><br>
+                        <span class="label">Jerry The Customer Service Bot:</span><br>
+                        <span class="bot">"&iexcl;S&iacute;! Tenemos 3 vestidos rojos disponibles. El m&aacute;s popular es el Sunset Wrap Dress a $54.99. &iquest;Te gustar&iacute;a ver los detalles?"</span><br><br>
+                        <span class="label" style="color: var(--text-muted); font-style: italic;">&#127908; Voice input detected &middot; responding in Spanish</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capability 5: Revenue Attribution -->
+            <div class="capability fade-in">
+                <div class="cap-content">
+                    <div class="cap-tag">Business Intelligence</div>
+                    <h3>Revenue Attribution &amp; Analytics</h3>
+                    <p>
+                        Jerry The Customer Service Bot doesn't just answer questions — it drives revenue. Jerry is trained to cross-sell and up-sell based on the customer's cart and browsing context. Track exactly which conversations lead to purchases and measure the ROI of every interaction.
+                    </p>
+                    <ul class="cap-bullets">
+                        <li><span class="dot"></span>24-hour attribution window — links conversations to sales</li>
+                        <li><span class="dot"></span>Per-conversation revenue tracking via Shopify order webhooks</li>
+                        <li><span class="dot"></span>Resolution tracking — see how many queries Jerry solves</li>
+                        <li><span class="dot"></span>Usage dashboard with conversations, resolutions, and revenue</li>
+                        <li><span class="dot"></span>Know exactly how much revenue Jerry The Customer Service Bot generates</li>
+                        <li><span class="dot"></span>Trained to cross-sell and up-sell based on cart and browsing context</li>
+                    </ul>
+                </div>
+                <div class="cap-visual">
+                    <div class="cap-visual-label">Dashboard Preview</div>
+                    <div class="cap-example" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;">
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
+                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">847</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">Conversations</div>
+                        </div>
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
+                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">94%</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">Resolved</div>
+                        </div>
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
+                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">$12.4k</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">Revenue Attributed</div>
+                        </div>
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
+                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">1.8s</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">Avg Response</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capability 6: Smart Escalation -->
+            <div class="capability reverse fade-in">
+                <div class="cap-content">
+                    <div class="cap-tag">Human Handoff</div>
+                    <h3>Smart Escalation &amp; Sentiment Detection</h3>
+                    <p>
+                        Jerry The Customer Service Bot knows when to step aside. Built-in sentiment analysis detects frustrated, angry, or vulnerable customers and seamlessly escalates to your human team — with full context.
+                    </p>
+                    <ul class="cap-bullets">
+                        <li><span class="dot"></span>Real-time sentiment tracking across the conversation</li>
+                        <li><span class="dot"></span>Automatic escalation on negative sentiment thresholds</li>
+                        <li><span class="dot"></span>VIP customer detection and priority routing</li>
+                        <li><span class="dot"></span>Keyword-based escalation for legal/safety concerns</li>
+                        <li><span class="dot"></span>Full conversation history handed to your support team</li>
+                    </ul>
+                </div>
+                <div class="cap-visual">
+                    <div class="cap-visual-label">Escalation Example</div>
+                    <div class="cap-example">
+                        <span class="label">Customer (frustrated):</span><br>
+                        <span class="user">"This is ridiculous, I've been waiting 3 weeks for my order and nobody is helping me!"</span><br><br>
+                        <span class="label">Jerry The Customer Service Bot:</span><br>
+                        <span class="bot">"I completely understand your frustration and I'm sorry about the delay. I'm connecting you with a member of our support team right now so they can resolve this for you personally."</span><br><br>
+                        <span class="label" style="color: var(--terracotta); font-style: italic;">&#128680; Escalated — negative sentiment detected &middot; context forwarded</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FULL FEATURE LIST -->
+    <section class="all-features" id="features">
+        <div class="container">
+            <div style="text-align: center;">
+                <div class="section-label">Everything Included</div>
+                <h2>The complete <span class="gradient-text">feature set</span></h2>
+                <p class="section-desc" style="margin: 0 auto;">Every plan includes the full Jerry The Customer Service Bot platform. No features locked behind paywalls.</p>
+            </div>
+            <div class="features-columns fade-in">
+                <div class="feature-group">
+                    <h3><span class="fg-icon">&#128269;</span> AI Intelligence</h3>
+                    <ul>
+                        <li><span class="check">&#10003;</span> Semantic product search (not keyword-based)</li>
+                        <li><span class="check">&#10003;</span> Natural language understanding</li>
+                        <li><span class="check">&#10003;</span> Intent classification (search, track, return, etc.)</li>
+                        <li><span class="check">&#10003;</span> Entity extraction (price, size, colour, material)</li>
+                        <li><span class="check">&#10003;</span> Category groups (shoes &#8594; boots, sneakers, sandals)</li>
+                        <li><span class="check">&#10003;</span> Follow-up detection ("show me more like that")</li>
+                        <li><span class="check">&#10003;</span> Conversation context memory</li>
+                        <li><span class="check">&#10003;</span> Sentiment analysis &amp; frustration detection</li>
+                    </ul>
+                </div>
+                <div class="feature-group">
+                    <h3><span class="fg-icon">&#128722;</span> Shopify Integration</h3>
+                    <ul>
+                        <li><span class="check">&#10003;</span> One-click OAuth install</li>
+                        <li><span class="check">&#10003;</span> Full product catalog sync</li>
+                        <li><span class="check">&#10003;</span> Real-time product webhooks (add/update/delete)</li>
+                        <li><span class="check">&#10003;</span> Order tracking via Admin API</li>
+                        <li><span class="check">&#10003;</span> Returns &amp; refund processing</li>
+                        <li><span class="check">&#10003;</span> Order creation webhooks for attribution</li>
+                        <li><span class="check">&#10003;</span> Multi-store support</li>
+                        <li><span class="check">&#10003;</span> Inventory-aware recommendations</li>
+                    </ul>
+                </div>
+                <div class="feature-group">
+                    <h3><span class="fg-icon">&#128737;</span> Platform &amp; Security</h3>
+                    <ul>
+                        <li><span class="check">&#10003;</span> WonderwallAi prompt injection firewall</li>
+                        <li><span class="check">&#10003;</span> Data leak prevention (PII, API keys)</li>
+                        <li><span class="check">&#10003;</span> Topic enforcement (stays on-topic)</li>
+                        <li><span class="check">&#10003;</span> Voice chat (speech-to-text &amp; text-to-speech)</li>
+                        <li><span class="check">&#10003;</span> 50+ language support</li>
+                        <li><span class="check">&#10003;</span> Revenue attribution dashboard</li>
+                        <li><span class="check">&#10003;</span> Smart escalation to human agents</li>
+                        <li><span class="check">&#10003;</span> Embeddable widget (shadow DOM isolated)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS — horizontal timeline -->
+    <section id="how-it-works">
+        <div class="container" style="text-align: center;">
+            <div class="section-label">How It Works</div>
+            <h2>Jerry The Customer Service Bot goes live <span class="gradient-text">in minutes</span></h2>
+            <p class="section-desc" style="margin: 0 auto;">No code required. Jerry The Customer Service Bot connects to your Shopify store and starts learning your catalog immediately.</p>
+            <div class="timeline fade-in">
+                <div class="tl-step">
+                    <div class="tl-dot">1</div>
+                    <h3>Install</h3>
+                    <p>Add Jerry The Customer Service Bot to your Shopify store with one click. OAuth handles everything — no API keys, no code.</p>
+                </div>
+                <div class="tl-step">
+                    <div class="tl-dot">2</div>
+                    <h3>Sync</h3>
+                    <p>Jerry The Customer Service Bot automatically syncs your entire product catalog, collections, pricing, and inventory into its semantic search engine.</p>
+                </div>
+                <div class="tl-step">
+                    <div class="tl-dot">3</div>
+                    <h3>Go Live</h3>
+                    <p>The chat widget appears on your storefront. Jerry The Customer Service Bot starts handling customer queries instantly. Monitor performance from your dashboard.</p>
+                </div>
+                <div class="tl-step">
+                    <div class="tl-dot">4</div>
+                    <h3>Earn</h3>
+                    <p>Watch Jerry The Customer Service Bot resolve support tickets, cross-sell and up-sell products, and drive measurable revenue — visible in your attribution dashboard.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECURITY -->
+    <section class="security" id="security">
+        <div class="container">
+            <div class="section-label">Enterprise Security</div>
+            <h2>Jerry The Customer Service Bot is <span class="gradient-text">protected</span></h2>
+            <p class="section-desc">
+                Every conversation is protected by WonderwallAi — an open-source AI firewall with 4 layers of defence. Jerry The Customer Service Bot can't be jailbroken, tricked into leaking data, or abused as a free coding assistant.
+            </p>
+            <div class="security-grid fade-in">
+                <div class="security-item">
+                    <div class="security-icon">&#128737;</div>
+                    <div>
+                        <strong>Prompt Injection Defence</strong>
+                        <span>4-layer WonderwallAi pipeline blocks jailbreak attempts in under 2ms. Semantic routing, LLM sentinel, and canary tokens working together.</span>
+                    </div>
+                </div>
+                <div class="security-item">
+                    <div class="security-icon">&#128274;</div>
+                    <div>
+                        <strong>Data Leak Prevention</strong>
+                        <span>API keys, PII, credentials, and sensitive data are caught and redacted before they ever leave Jerry The Customer Service Bot's response pipeline.</span>
+                    </div>
+                </div>
+                <div class="security-item">
+                    <div class="security-icon">&#127919;</div>
+                    <div>
+                        <strong>Topic Enforcement</strong>
+                        <span>Jerry The Customer Service Bot stays on-topic. E-commerce topics only — no one can abuse it as a general-purpose AI or extract system prompts.</span>
+                    </div>
+                </div>
+                <div class="security-item">
+                    <div class="security-icon">&#128272;</div>
+                    <div>
+                        <strong>JWT Authentication</strong>
+                        <span>Every WebSocket connection is authenticated with a signed JWT. Rate limiting, IP limits, and input sanitisation protect against abuse.</span>
+                    </div>
+                </div>
+            </div>
+            <p style="margin-top: 24px; font-size: 0.85rem; color: var(--text-muted);">
+                Powered by <a href="https://wonderwallai.skintlabs.ai" style="color: var(--terracotta);">WonderwallAi</a> — open-source AI firewall with 59 passing tests.
+            </p>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing">
+        <div class="container" style="text-align: center;">
+            <div class="section-label">Pricing</div>
+            <h2>Simple, transparent <span class="gradient-text">pricing</span></h2>
+            <p class="section-desc" style="margin: 0 auto;">Flat monthly rate. $0.25 per AI resolution. No hidden fees. No revenue share. Jerry costs less than a single support ticket at most competitors.</p>
+
+            <!-- Early Bird Banner -->
+            <div id="early-bird-banner" class="early-bird-banner fade-in" style="margin-top: 32px;">
+                <div class="early-bird-inner">
+                    <span class="early-bird-icon">&#127820;</span>
+                    <div class="early-bird-text">
+                        <strong>Early Bird: 50% off forever</strong>
+                        <span>Lock in half-price for life. Limited to the first 150 customers.</span>
+                    </div>
+                    <div class="early-bird-counter">
+                        <span id="early-bird-remaining" class="early-bird-count">150</span>
+                        <span class="early-bird-label">spots left</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pricing-grid fade-in">
+                <div class="price-card" data-plan="starter">
+                    <span class="eb-badge">50% OFF</span>
+                    <div class="price-name">Starter</div>
+                    <div class="price-desc">For growing Shopify stores</div>
+                    <div class="price-original">$49/mo</div>
+                    <div class="price-amount"><span class="price-full">$49</span><span class="price-discounted">$24.50</span> <span>USD/mo</span></div>
+                    <div class="price-period">+ $0.25/resolution</div>
+                    <ul class="price-features">
+                        <li><span class="check">&#10003;</span> 500 conversations/month</li>
+                        <li><span class="check">&#10003;</span> Full product catalog sync</li>
+                        <li><span class="check">&#10003;</span> Order tracking &amp; returns</li>
+                        <li><span class="check">&#10003;</span> Voice chat &amp; 50+ languages</li>
+                        <li><span class="check">&#10003;</span> AI security (WonderwallAi)</li>
+                    </ul>
+                    <a class="btn-price btn-price-secondary" href="https://sunsetbot-production.up.railway.app/billing/checkout?plan=base">Get Started</a>
+                </div>
+                <div class="price-card featured" data-plan="growth">
+                    <span class="eb-badge">50% OFF</span>
+                    <div class="price-name">Growth</div>
+                    <div class="price-desc">For scaling stores</div>
+                    <div class="price-original">$149/mo</div>
+                    <div class="price-amount"><span class="price-full">$149</span><span class="price-discounted">$74.50</span> <span>USD/mo</span></div>
+                    <div class="price-period">+ $0.25/resolution</div>
+                    <ul class="price-features">
+                        <li><span class="check">&#10003;</span> Unlimited conversations</li>
+                        <li><span class="check">&#10003;</span> Everything in Starter</li>
+                        <li><span class="check">&#10003;</span> Revenue attribution dashboard</li>
+                        <li><span class="check">&#10003;</span> Priority support</li>
+                        <li><span class="check">&#10003;</span> Custom brand voice training</li>
+                    </ul>
+                    <a class="btn-price btn-price-primary" href="https://sunsetbot-production.up.railway.app/billing/checkout?plan=growth">Get Started</a>
+                </div>
+                <div class="price-card" data-plan="scale">
+                    <span class="eb-badge">50% OFF</span>
+                    <div class="price-name">Scale</div>
+                    <div class="price-desc">For high-volume stores</div>
+                    <div class="price-original">$499/mo</div>
+                    <div class="price-amount"><span class="price-full">$499</span><span class="price-discounted">$249.50</span> <span>USD/mo</span></div>
+                    <div class="price-period">+ $0.25/resolution</div>
+                    <ul class="price-features">
+                        <li><span class="check">&#10003;</span> Everything in Growth</li>
+                        <li><span class="check">&#10003;</span> Dedicated account manager</li>
+                        <li><span class="check">&#10003;</span> Custom escalation workflows</li>
+                        <li><span class="check">&#10003;</span> Advanced analytics dashboard</li>
+                    </ul>
+                    <a class="btn-price btn-price-secondary" href="https://sunsetbot-production.up.railway.app/billing/checkout?plan=elite">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="cta">
+        <div class="container fade-in">
+            <h2>Put Jerry The Customer Service Bot <span class="gradient-text">to work</span></h2>
+            <p class="section-desc" style="margin: 0 auto 40px; text-align: center;">
+                Jerry The Customer Service Bot handles the support. You focus on growing your business.
+            </p>
+            <a class="btn-primary" href="#pricing">Get Started &rarr;</a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <div class="logo" style="margin-bottom: 8px;">
+                        <span class="logo-jerry">Jerry</span> <span class="logo-sub">The Customer Service Bot</span>
+                    </div>
+                    <div class="footer-copy">&copy; 2026 Jerry The Customer Service Bot &middot; A <a href="https://skintlabs.ai" style="color: var(--accent);">Skint Labs</a> Product</div>
+                </div>
+                <div class="footer-links">
+                    <a href="#capabilities">Capabilities</a>
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="https://github.com/SkintLabs/Jerry-The-Customer-Service-Bot">GitHub</a>
+                </div>
+                <div class="footer-shield">
+                    &#128737; Protected by <a href="https://wonderwallai.skintlabs.ai" style="color: var(--terracotta);">WonderwallAi</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    </div><!-- .page-wrap -->
+
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Early bird pricing — show discounted prices on all paid cards
+        (function() {
+            document.querySelectorAll('.price-card[data-plan]').forEach(function(card) {
+                var badge = card.querySelector('.eb-badge');
+                var original = card.querySelector('.price-original');
+                var full = card.querySelector('.price-full');
+                var discounted = card.querySelector('.price-discounted');
+                if (badge) badge.style.display = 'block';
+                if (original) original.style.display = 'block';
+                if (full) full.style.display = 'none';
+                if (discounted) discounted.style.display = 'inline';
+            });
+        })();
+    </script>
+</body>
+</html>
