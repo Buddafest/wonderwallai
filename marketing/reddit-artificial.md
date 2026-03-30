@@ -58,7 +58,7 @@ verdict = await wall.scan_inbound("How do I return this?")
 ```
 
 **Links:**
-- GitHub: https://github.com/Buddafest/wonderwallai
+- GitHub: https://github.com/SkintLabs/SkintLabs
 - PyPI: https://pypi.org/project/wonderwallai/
 - Landing page: https://wonderwallai.skintlabs.ai
 

@@ -52,7 +52,25 @@ After building it for Jerry, I realized every developer deploying an LLM-facing 
 
 Skint is Australian slang for broke. I started this company with no funding, no team, no technical background, and not much money. The name is a reminder of where this started and a commitment to building tools that are accessible — not just for companies with enterprise budgets.
 
-Both products reflect that philosophy. Jerry's base plan is $299/month, a fraction of what a human support agent costs. WonderwallAi's SDK is completely free and open source, with a hosted API starting at $0/month.
+Both products reflect that philosophy. Jerry's base plan is $49/month — a fraction of what a human support agent costs — with a 7-day free trial. WonderwallAi's SDK is completely free and open source, with a hosted API starting at $0/month.
+
+## The Observability Problem Nobody Talks About
+
+After the security wake-up call, there was a second problem I kept running into: when Jerry did something unexpected, I had no way to know why.
+
+Most AI tools log what happened. They don't log why. You can see that Jerry recommended Product X, but not what intent he classified, what similarity score that product got, what options he considered, or how confident he was. When something goes wrong — a bad recommendation, an unnecessary escalation, a slow response — you're guessing. That's the black box problem.
+
+Deterministic systems fail loudly. You see the error, fix the bug, deploy. AI agents drift quietly. One day the intent classifier starts hitting "general" instead of "product_search" for a class of queries. The product recommendations get subtly worse. Response times creep up. You won't notice unless you're logging at the right level of granularity.
+
+So I implemented full intent and context logging across both products. Every agent decision is now auditable:
+
+**For Jerry:** intent classification logs which keyword matched (or "no_match: default_general") with a confidence score. Product search logs the results count, top similarity score, filters applied, and reranking decisions. Escalations log the trigger type, priority, and details. Every LLM call records the model, token counts (in/out/total), and latency. The entire pipeline logs a summary per WebSocket turn with total latency. All of this is bound to a `session_id`, `store_id`, and `turn_number` so you can trace any conversation from any angle.
+
+**For WonderwallAi:** every scan logs per-layer timing — how long the semantic router took, how long the sentinel classifier took, how long the egress filter took. Every block logs the exact reason: which topic was closest and how far it was from the threshold, or what the LLM returned. The `request_id` propagates through every log line automatically.
+
+The format is structured JSON, captured by Railway's stdout logging. No Prometheus, no Grafana, no infrastructure overhead. Query with `jq` in five seconds.
+
+Most people building AI products are going to find out the hard way that un-observable AI is un-trustworthy AI. You can't optimise what you can't measure, and you can't debug what you can't audit. Jerry and WonderwallAi both solve this problem now — and I think that's going to matter more as the AI product market matures.
 
 ## What I Learned
 
@@ -72,9 +90,9 @@ If you run a Shopify store and you're tired of answering the same questions, try
 
 ---
 
-**Jerry The Customer Service Bot:** https://jerry.skintlabs.ai | [Live Demo](https://sunsetbot-production.up.railway.app/static/demo.html)
+**Jerry The Customer Service Bot:** https://jerry.skintlabs.ai
 
-**WonderwallAi:** https://wonderwallai.skintlabs.ai | [GitHub](https://github.com/Buddafest/wonderwallai) | [PyPI](https://pypi.org/project/wonderwallai/)
+**WonderwallAi:** https://wonderwallai.skintlabs.ai | [GitHub](https://github.com/SkintLabs/SkintLabs) | [PyPI](https://pypi.org/project/wonderwallai/)
 
 **Skint Labs:** https://skintlabs.ai
 

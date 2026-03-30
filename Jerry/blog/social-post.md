@@ -1,10 +1,9 @@
 # Jerry The Customer Service Bot — Social Media Launch Posts
 
 ## Links
-- **Live demo:** https://sunsetbot-production.up.railway.app/static/demo.html
-- **Landing page:** https://buddafest.github.io/sunsetbot/
-- **GitHub:** https://github.com/SkintLabs/Jerry
-- **WonderwallAi:** https://buddafest.github.io/wonderwallai/
+- **Install Jerry:** https://jerry.skintlabs.ai
+- **WonderwallAi:** https://wonderwallai.skintlabs.ai
+- **Skint Labs:** https://skintlabs.ai
 
 ---
 
@@ -24,11 +23,13 @@ Now both products are ready.
 
 Jerry installs on any Shopify store with one click. No code required. He syncs your product catalog in seconds and starts handling customer questions immediately. And every single conversation is protected by WonderwallAi's 4-layer AI firewall.
 
+Here's what makes Jerry different from every other Shopify chatbot: **full observability**. Every decision Jerry makes is logged — not just what he said, but WHY he said it. Every intent classification, product recommendation, and escalation decision is auditable. You can query your logs and see exactly why Jerry recommended a specific product, or why a conversation was escalated, or how long each step took. Most AI assistants are a black box. Jerry isn't.
+
+7-day free trial. No credit card required upfront.
+
 If you run a Shopify store and you're tired of answering "Where's my order?" at 2am, Jerry's for you.
 
-Try the live demo (no signup needed): https://sunsetbot-production.up.railway.app/static/demo.html
-
-Learn more: https://buddafest.github.io/sunsetbot/
+👉 Install Jerry: https://jerry.skintlabs.ai
 
 Built by Skint Labs.
 
@@ -46,9 +47,11 @@ The key differentiator: Jerry doesn't do keyword matching. Ask "Do you have some
 
 When we put Jerry in production, real users immediately started testing the boundaries (prompt injection, system prompt extraction, data exfiltration attempts). That's what led us to build WonderwallAi as a standalone security layer. Now every Jerry conversation is protected by a 4-layer AI firewall.
 
-One-click Shopify install. No code. Goes live in minutes.
+The part I'm most proud of recently: **full agent observability**. Most AI chatbots are black boxes — you can see what they said, but not why. Jerry logs every decision with full context: intent classification with confidence scores, product search results with similarity scores, escalation triggers with reasoning, and end-to-end latency per turn. Every conversation is auditable without anyone needing to be there when it happened. That's the difference between an AI toy and production infrastructure.
 
-Try the live demo: https://sunsetbot-production.up.railway.app/static/demo.html
+One-click Shopify install. 7-day free trial. No code.
+
+Install Jerry: https://jerry.skintlabs.ai
 
 If you're building with LLMs or running a Shopify store, I'd love to hear your thoughts.
 
@@ -62,7 +65,7 @@ If you're building with LLMs or running a Shopify store, I'd love to hear your t
 My company @SkintLabs just shipped two AI products:
 
 1. An AI firewall that blocks prompt injection in <2ms
-2. An AI customer service bot for Shopify that actually understands your products
+2. An AI customer service bot for Shopify that logs every decision it makes so you can actually audit it
 
 Here's the story of how building one led to the other:
 
@@ -95,17 +98,29 @@ Jerry handles:
 - Returns & refund policies
 - Voice chat in 50+ languages
 - Revenue attribution (see which chats drive sales)
+- Full intent logging — audit every recommendation, classification, escalation
 
-One-click install. No code. Goes live in minutes.
+One-click install. 7-day free trial.
 
-**Tweet 6 (CTA):**
-Try Jerry live right now — no signup needed:
-https://sunsetbot-production.up.railway.app/static/demo.html
+**Tweet 6 (Observability angle — the differentiator):**
+The thing most AI chatbot builders skip: intent logging.
 
-Landing page: https://buddafest.github.io/sunsetbot/
-WonderwallAi: https://buddafest.github.io/wonderwallai/
+Jerry doesn't just log what it said. It logs WHY.
 
-Both built by Skint Labs.
+Every intent classification → confidence score + reason
+Every product recommendation → semantic similarity score
+Every escalation → trigger + priority level
+Every LLM call → token count + latency
+
+Agents drift quietly. Intent logging catches it early.
+
+**Tweet 7 (CTA):**
+Install Jerry for your Shopify store — 7-day free trial:
+https://jerry.skintlabs.ai
+
+WonderwallAi: https://wonderwallai.skintlabs.ai
+
+Both built by @SkintLabs.
 
 ---
 
@@ -117,8 +132,10 @@ Jerry knows every product in your catalog, tracks orders, handles returns, speak
 
 He's also protected by our AI firewall (WonderwallAi) so nobody can jailbreak him.
 
-One-click Shopify install. No code required.
+And unlike every other AI chatbot — every decision Jerry makes is logged with full context. You can audit exactly why he said what he said, without being there when it happened.
 
-Try the live demo: https://sunsetbot-production.up.railway.app/static/demo.html
+One-click Shopify install. 7-day free trial.
+
+👉 https://jerry.skintlabs.ai
 
 Built by Skint Labs.

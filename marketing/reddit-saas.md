@@ -11,13 +11,15 @@ Six months ago I couldn't write a line of code. Today I'm launching two SaaS pro
 
 **1. Jerry The Customer Service Bot** (jerry.skintlabs.ai) — An AI customer service assistant for Shopify stores. Not another chatbot wrapper that sends messages to GPT. Jerry connects to your actual Shopify store: it syncs your product catalog into a semantic search engine, pulls live order data for tracking, processes returns through your real policies, and speaks 50+ languages with built-in voice chat.
 
-Pricing: $299/mo base + performance billing. You only pay more when Jerry earns you more.
+Pricing: $49/mo Base (500 conversations), $149/mo Growth, $499/mo Elite. 7-day free trial on all plans.
 
 **2. WonderwallAi** (wonderwallai.skintlabs.ai) — An open-source AI firewall SDK for LLM applications. I built this after watching users try to jailbreak Jerry in production. Someone managed to extract an API key from the LLM's context window during the first week. WonderwallAi sits between your users and your LLM with 4 protection layers, blocking prompt injection in under 2ms.
 
 Open source (MIT), on PyPI, free tier available on the hosted API.
 
 **What I learned building both:**
+
+- Un-observable AI is un-trustworthy AI. I spent a lot of time implementing full intent logging across both products — not just logging what the AI said, but WHY it made every decision. Confidence scores on intent classification. Semantic similarity scores on product recommendations. Trigger types on escalations. Token counts and latency on every LLM call. Structured JSON, queried with `jq`. Most AI products skip this layer entirely. I think that's going to matter as the market matures — people will sort through AI tools and keep the ones they can actually audit and debug.
 
 - Building two products simultaneously as a solo founder is a bad idea that I'd do again. WonderwallAi started as an internal security module for Jerry, and I extracted it into its own product because the problem it solves is universal. The upside is they feed each other — Jerry is the proof that WonderwallAi works in production.
 
@@ -36,5 +38,5 @@ Both products are live. I'd genuinely appreciate feedback on the landing pages, 
 **Links:**
 - Jerry: https://jerry.skintlabs.ai
 - WonderwallAi: https://wonderwallai.skintlabs.ai
-- WonderwallAi GitHub: https://github.com/Buddafest/wonderwallai
+- WonderwallAi GitHub: https://github.com/SkintLabs/SkintLabs
 - Parent company: https://skintlabs.ai (Skint Labs)

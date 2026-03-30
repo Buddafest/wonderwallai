@@ -279,13 +279,18 @@ async def shopify_billing_callback(
         raise HTTPException(status_code=404, detail="Store not found")
 
     if charge_id:
-        # Merchant approved — mark as pending (webhook will confirm activation)
+        # Merchant approved — start 7-day trial immediately so the app is usable at once.
+        # The Shopify app_subscriptions/activate webhook will later confirm and set to "active".
         async with get_db() as db:
             result = await db.execute(select(Store).where(Store.shopify_domain == shop))
             store = result.scalar_one()
-            store.subscription_status = "pending"
+            store.subscription_status = "trialing"
             store.jerry_plan = plan
-        logger.info(f"Shopify billing approved for {shop}, plan={plan}, charge_id={charge_id}")
+            # Persist the numeric charge_id as a temporary reference until
+            # the webhook overwrites it with the full GID (gid://shopify/AppSubscription/…)
+            if not store.shopify_subscription_id:
+                store.shopify_subscription_id = str(charge_id)
+        logger.info(f"Shopify billing approved for {shop}, plan={plan}, charge_id={charge_id} → trialing")
         # Redirect to Jerry dashboard
         return RedirectResponse(url=f"{settings.app_url}/dashboard?shop={shop}&billing=approved")
     else:
