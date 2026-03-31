@@ -1082,7 +1082,7 @@ wall = Wonderwall(
                 
                 <div class="early-bird-text">
                     <strong>Early Bird Special: 50% off forever</strong>
-                    <span>Lock in half-price for life. Limited to the first 300 paying customers.</span>
+                    <span>Lock in half-price for life. Limited to the first 288 paying customers.</span>
                 </div>
                 <div class="early-bird-counter">
                     <span id="early-bird-remaining" class="early-bird-count">---</span>
@@ -1269,7 +1269,7 @@ document.querySelectorAll('.faq-question').forEach(btn => {
 
         // Static fallback: show early bird until API is live (remove this block once deployed)
         if (!data) {
-            data = { active: true, remaining_spots: 300, discount_percent: 50 };
+            data = { active: true, remaining_spots: 288, discount_percent: 50 };
         }
 
         if (!data.active) return;
