@@ -100,18 +100,26 @@ class Store(Base):
         comment="Custom welcome message (overrides default)",
     )
 
-    # --- Stripe / Billing ---
+    # --- Billing ---
     stripe_customer_id: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True,
-        comment="Stripe Customer ID (cus_xxx)",
+        comment="Stripe Customer ID (cus_xxx) — legacy, kept for migration",
     )
     stripe_subscription_id: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True,
-        comment="Stripe Subscription ID (sub_xxx)",
+        comment="Stripe Subscription ID (sub_xxx) — legacy, kept for migration",
+    )
+    shopify_subscription_id: Mapped[Optional[str]] = mapped_column(
+        String(255), nullable=True,
+        comment="Shopify AppSubscription GID (gid://shopify/AppSubscription/xxx)",
+    )
+    shopify_plan: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True,
+        comment="Shopify billing plan: base | growth | elite",
     )
     jerry_plan: Mapped[str] = mapped_column(
         String(32), default="base",
-        comment="Billing plan: base | elite",
+        comment="Billing plan: base | growth | elite",
     )
     monthly_interaction_limit: Mapped[int] = mapped_column(
         Integer, default=500,
@@ -127,7 +135,7 @@ class Store(Base):
     )
     subscription_status: Mapped[str] = mapped_column(
         String(32), default="none",
-        comment="Stripe status: none | trialing | active | past_due | canceled | incomplete",
+        comment="Status: none | trialing | active | past_due | canceled | incomplete",
     )
 
     # --- Sync state ---

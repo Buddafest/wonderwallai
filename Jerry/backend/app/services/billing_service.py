@@ -189,15 +189,26 @@ class BillingService:
 
 
 class ShopifyBillingService:
-    """Manages Shopify App Subscriptions for App Store billing."""
+    """
+    Manages Shopify App Subscriptions for App Store billing.
+
+    Replaces Stripe for public App Store distribution. Shopify handles all
+    payment processing; merchants see charges on their Shopify invoice.
+
+    Billing model:
+      - Recurring: flat monthly fee ($49 / $149 / $499)
+      - Usage: $0.25 per AI resolution, capped per plan
+    """
 
     PLAN_CONFIG = {
         "base": {
-            "name": "Jerry Base",
+            "name": "Jerry Starter",
             "price": "49.00",
             "currency": "USD",
             "interval": "EVERY_30_DAYS",
             "trial_days": 7,
+            "usage_capped_amount": "125.00",  # 500 resolutions × $0.25
+            "usage_terms": "$0.25 per AI resolution",
         },
         "growth": {
             "name": "Jerry Growth",
@@ -205,15 +216,43 @@ class ShopifyBillingService:
             "currency": "USD",
             "interval": "EVERY_30_DAYS",
             "trial_days": 7,
+            "usage_capped_amount": "500.00",  # 2000 resolutions × $0.25
+            "usage_terms": "$0.25 per AI resolution",
         },
         "elite": {
-            "name": "Jerry Elite",
+            "name": "Jerry Scale",
             "price": "499.00",
             "currency": "USD",
             "interval": "EVERY_30_DAYS",
             "trial_days": 7,
+            "usage_capped_amount": "2500.00",  # 10000 resolutions × $0.25
+            "usage_terms": "$0.25 per AI resolution",
         },
     }
+
+    # Shopify GraphQL API version
+    API_VERSION = "2024-10"
+
+    def __init__(self):
+        self.configured = True  # Always configured — uses store access tokens
+        logger.info("ShopifyBillingService initialized")
+
+    async def _graphql(self, shop_domain: str, access_token: str, query: str, variables: dict) -> dict:
+        """Execute a Shopify Admin GraphQL request."""
+        import httpx
+        url = f"https://{shop_domain}/admin/api/{self.API_VERSION}/graphql.json"
+        headers = {
+            "X-Shopify-Access-Token": access_token,
+            "Content-Type": "application/json",
+        }
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                url,
+                json={"query": query, "variables": variables},
+                headers=headers,
+            )
+            response.raise_for_status()
+        return response.json()
 
     async def create_subscription(
         self,
@@ -223,16 +262,29 @@ class ShopifyBillingService:
         return_url: str,
     ) -> dict:
         """
-        Create a Shopify AppSubscription and return the confirmationUrl.
-        The merchant must be redirected to confirmationUrl to approve billing.
+        Create a Shopify AppSubscription with recurring fee + usage component.
+        Returns dict with subscription_id, confirmation_url, status.
+        The merchant must be redirected to confirmation_url to approve billing.
         """
         plan_config = self.PLAN_CONFIG.get(plan)
         if not plan_config:
             raise ValueError(f"Unknown plan: {plan}")
 
         mutation = """
-        mutation AppSubscriptionCreate($name: String!, $returnUrl: URL!, $lineItems: [AppSubscriptionLineItemInput!]!, $trialDays: Int) {
-          appSubscriptionCreate(name: $name, returnUrl: $returnUrl, lineItems: $lineItems, trialDays: $trialDays) {
+        mutation AppSubscriptionCreate(
+            $name: String!,
+            $returnUrl: URL!,
+            $lineItems: [AppSubscriptionLineItemInput!]!,
+            $trialDays: Int,
+            $test: Boolean
+        ) {
+          appSubscriptionCreate(
+            name: $name,
+            returnUrl: $returnUrl,
+            lineItems: $lineItems,
+            trialDays: $trialDays,
+            test: $test
+          ) {
             appSubscription {
               id
               status
@@ -246,11 +298,16 @@ class ShopifyBillingService:
         }
         """
 
+        import os
+        is_test = os.getenv("ENVIRONMENT", "development") != "production"
+
         variables = {
             "name": plan_config["name"],
             "returnUrl": return_url,
             "trialDays": plan_config["trial_days"],
+            "test": is_test,
             "lineItems": [
+                # Line item 1: recurring flat fee
                 {
                     "plan": {
                         "appRecurringPricingDetails": {
@@ -261,26 +318,23 @@ class ShopifyBillingService:
                             "interval": plan_config["interval"],
                         }
                     }
-                }
+                },
+                # Line item 2: usage-based ($0.25 per resolution)
+                {
+                    "plan": {
+                        "appUsagePricingDetails": {
+                            "terms": plan_config["usage_terms"],
+                            "cappedAmount": {
+                                "amount": plan_config["usage_capped_amount"],
+                                "currencyCode": plan_config["currency"],
+                            },
+                        }
+                    }
+                },
             ],
         }
 
-        import httpx
-        url = f"https://{shop_domain}/admin/api/2024-10/graphql.json"
-        headers = {
-            "X-Shopify-Access-Token": access_token,
-            "Content-Type": "application/json",
-        }
-
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                url,
-                json={"query": mutation, "variables": variables},
-                headers=headers,
-            )
-            response.raise_for_status()
-
-        data = response.json()
+        data = await self._graphql(shop_domain, access_token, mutation, variables)
         result = data.get("data", {}).get("appSubscriptionCreate", {})
 
         user_errors = result.get("userErrors", [])
@@ -292,6 +346,121 @@ class ShopifyBillingService:
             "confirmation_url": result["confirmationUrl"],
             "status": result["appSubscription"]["status"],
         }
+
+    async def report_resolution(
+        self,
+        shop_domain: str,
+        access_token: str,
+        subscription_line_item_id: str,
+        description: str = "AI resolution",
+        price_amount: str = "0.25",
+    ) -> bool:
+        """
+        Report a single usage charge ($0.25 per AI resolution) via appUsageRecordCreate.
+        Called by AnalyticsService after each resolved support interaction.
+        """
+        mutation = """
+        mutation AppUsageRecordCreate(
+            $subscriptionLineItemId: ID!,
+            $price: MoneyInput!,
+            $description: String!
+        ) {
+          appUsageRecordCreate(
+            subscriptionLineItemId: $subscriptionLineItemId,
+            price: $price,
+            description: $description
+          ) {
+            appUsageRecord { id }
+            userErrors { field message }
+          }
+        }
+        """
+
+        variables = {
+            "subscriptionLineItemId": subscription_line_item_id,
+            "price": {"amount": price_amount, "currencyCode": "USD"},
+            "description": description,
+        }
+
+        try:
+            data = await self._graphql(shop_domain, access_token, mutation, variables)
+            result = data.get("data", {}).get("appUsageRecordCreate", {})
+
+            user_errors = result.get("userErrors", [])
+            if user_errors:
+                logger.error(f"Usage record error for {shop_domain}: {user_errors}")
+                return False
+
+            record_id = result.get("appUsageRecord", {}).get("id")
+            logger.info(f"Usage record created for {shop_domain}: {record_id} (${price_amount})")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to report usage for {shop_domain}: {e}")
+            return False
+
+    async def get_active_subscription(
+        self,
+        shop_domain: str,
+        access_token: str,
+    ) -> dict:
+        """
+        Fetch the current active subscription and its line items.
+        Returns the subscription dict including the usage line item ID needed for usage records.
+        """
+        query = """
+        query {
+          currentAppInstallation {
+            activeSubscriptions {
+              id
+              name
+              status
+              lineItems {
+                id
+                plan {
+                  pricingDetails {
+                    __typename
+                    ... on AppRecurringPricing {
+                      price { amount currencyCode }
+                      interval
+                    }
+                    ... on AppUsagePricing {
+                      terms
+                      balanceUsed { amount currencyCode }
+                      cappedAmount { amount currencyCode }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """
+        try:
+            data = await self._graphql(shop_domain, access_token, query, {})
+            subscriptions = (
+                data.get("data", {})
+                .get("currentAppInstallation", {})
+                .get("activeSubscriptions", [])
+            )
+            if subscriptions:
+                return subscriptions[0]
+            return {}
+        except Exception as e:
+            logger.error(f"Failed to fetch subscription for {shop_domain}: {e}")
+            return {}
+
+    async def get_usage_line_item_id(
+        self,
+        shop_domain: str,
+        access_token: str,
+    ) -> Optional[str]:
+        """Get the usage pricing line item ID from the active subscription."""
+        sub = await self.get_active_subscription(shop_domain, access_token)
+        for item in sub.get("lineItems", []):
+            pricing = item.get("plan", {}).get("pricingDetails", {})
+            if pricing.get("__typename") == "AppUsagePricing":
+                return item["id"]
+        return None
 
     async def cancel_subscription(
         self,
@@ -308,27 +477,17 @@ class ShopifyBillingService:
           }
         }
         """
-        import httpx
-        url = f"https://{shop_domain}/admin/api/2024-10/graphql.json"
-        headers = {
-            "X-Shopify-Access-Token": access_token,
-            "Content-Type": "application/json",
-        }
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                url,
-                json={"query": mutation, "variables": {"id": subscription_id}},
-                headers=headers,
-            )
-            response.raise_for_status()
-
-        data = response.json()
-        result = data.get("data", {}).get("appSubscriptionCancel", {})
-        user_errors = result.get("userErrors", [])
-        if user_errors:
-            logger.error(f"Cancel subscription errors: {user_errors}")
+        try:
+            data = await self._graphql(shop_domain, access_token, mutation, {"id": subscription_id})
+            result = data.get("data", {}).get("appSubscriptionCancel", {})
+            user_errors = result.get("userErrors", [])
+            if user_errors:
+                logger.error(f"Cancel subscription errors: {user_errors}")
+                return False
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cancel subscription: {e}")
             return False
-        return True
 
     async def get_subscription_status(
         self,
@@ -336,7 +495,7 @@ class ShopifyBillingService:
         access_token: str,
         subscription_id: str,
     ) -> str:
-        """Get the current status of a Shopify AppSubscription. Returns ACTIVE, PENDING, CANCELLED, DECLINED, EXPIRED, FROZEN."""
+        """Get the current status of a Shopify AppSubscription."""
         query = """
         query AppSubscription($id: ID!) {
           node(id: $id) {
@@ -347,18 +506,9 @@ class ShopifyBillingService:
           }
         }
         """
-        import httpx
-        url = f"https://{shop_domain}/admin/api/2024-10/graphql.json"
-        headers = {
-            "X-Shopify-Access-Token": access_token,
-            "Content-Type": "application/json",
-        }
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                url,
-                json={"query": query, "variables": {"id": subscription_id}},
-                headers=headers,
-            )
-            response.raise_for_status()
-        data = response.json()
-        return data.get("data", {}).get("node", {}).get("status", "UNKNOWN")
+        try:
+            data = await self._graphql(shop_domain, access_token, query, {"id": subscription_id})
+            return data.get("data", {}).get("node", {}).get("status", "UNKNOWN")
+        except Exception as e:
+            logger.error(f"Failed to get subscription status: {e}")
+            return "UNKNOWN"

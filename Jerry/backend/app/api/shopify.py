@@ -258,49 +258,12 @@ async def shopify_callback(request: Request):
     except ImportError:
         logger.warning("shopify_sync not available — skipping initial product sync")
 
-    # --- Return success page ---
-    return HTMLResponse(content=f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Jerry The Customer Service Bot — Installed!</title>
-        <style>
-            body {{
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                display: flex; justify-content: center; align-items: center;
-                min-height: 100vh; margin: 0;
-                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-                color: #fff;
-            }}
-            .card {{
-                background: rgba(255,255,255,0.1);
-                backdrop-filter: blur(10px);
-                border-radius: 16px; padding: 48px;
-                text-align: center; max-width: 500px;
-                border: 1px solid rgba(255,255,255,0.2);
-            }}
-            h1 {{ color: #FF6B35; margin-bottom: 16px; }}
-            p {{ color: #ccc; line-height: 1.6; }}
-            .store-name {{ color: #fff; font-weight: bold; }}
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <h1>Jerry The Customer Service Bot Installed!</h1>
-            <p>
-                Your store <span class="store-name">{store_domain}</span> is now connected.
-            </p>
-            <p>
-                We're syncing your product catalog now — this usually takes under a minute.
-                Once done, your AI shopping assistant will be ready to go!
-            </p>
-            <p style="margin-top: 24px; font-size: 14px; color: #999;">
-                You can close this tab and return to your Shopify admin.
-            </p>
-        </div>
-    </body>
-    </html>
-    """)
+    # --- Redirect to Shopify billing (plan selection) ---
+    # After install, take merchant straight to billing approval via Shopify's native UI.
+    # Default to "base" plan — merchant can upgrade later from the dashboard.
+    billing_url = f"{settings.app_url}/billing/shopify/subscribe?shop={store_domain}&plan=base"
+    logger.info(f"Redirecting {store_domain} to Shopify billing approval")
+    return RedirectResponse(url=billing_url)
 
 
 # ============================================================================
@@ -421,6 +384,104 @@ async def shopify_webhooks(request: Request):
         logger.warning(f"Shopify subscription approaching cap for {shop_domain}")
     else:
         logger.info(f"Unhandled webhook topic: {topic}")
+
+    return Response(status_code=200)
+
+
+# ============================================================================
+# GDPR MANDATORY WEBHOOKS — Required for Shopify App Store
+# ============================================================================
+
+@router.post("/gdpr/customers-data-request")
+async def gdpr_customers_data_request(request: Request):
+    """
+    Shopify GDPR: Customer data request.
+    A store owner requests data Jerry holds about a specific customer.
+    Jerry only stores anonymous chat sessions (no PII), so we acknowledge the request.
+    """
+    body = await request.body()
+    hmac_header = request.headers.get("X-Shopify-Hmac-Sha256", "")
+
+    if not verify_shopify_webhook(body, hmac_header):
+        raise HTTPException(status_code=401, detail="Invalid webhook signature")
+
+    import json
+    payload = json.loads(body)
+    shop_domain = payload.get("shop_domain", "unknown")
+    logger.info(f"GDPR customers/data_request from {shop_domain} — Jerry stores no customer PII")
+
+    return Response(status_code=200)
+
+
+@router.post("/gdpr/customers-redact")
+async def gdpr_customers_redact(request: Request):
+    """
+    Shopify GDPR: Customer data erasure request.
+    A customer requests deletion of their data. Jerry stores no customer PII
+    (only anonymous session IDs), so we acknowledge the request.
+    """
+    body = await request.body()
+    hmac_header = request.headers.get("X-Shopify-Hmac-Sha256", "")
+
+    if not verify_shopify_webhook(body, hmac_header):
+        raise HTTPException(status_code=401, detail="Invalid webhook signature")
+
+    import json
+    payload = json.loads(body)
+    shop_domain = payload.get("shop_domain", "unknown")
+    logger.info(f"GDPR customers/redact from {shop_domain} — Jerry stores no customer PII")
+
+    return Response(status_code=200)
+
+
+@router.post("/gdpr/shop-redact")
+async def gdpr_shop_redact(request: Request):
+    """
+    Shopify GDPR: Shop data erasure request.
+    48 hours after a store uninstalls, Shopify requests deletion of all store data.
+    We delete the store record and all associated chat sessions, resolutions, and sales.
+    """
+    body = await request.body()
+    hmac_header = request.headers.get("X-Shopify-Hmac-Sha256", "")
+
+    if not verify_shopify_webhook(body, hmac_header):
+        raise HTTPException(status_code=401, detail="Invalid webhook signature")
+
+    import json
+    payload = json.loads(body)
+    shop_domain = payload.get("shop_domain", "unknown")
+
+    logger.info(f"GDPR shop/redact for {shop_domain} — deleting all store data")
+
+    try:
+        from app.db.models import ChatSession, SupportResolution, AttributedSale, ChatInteraction
+        from sqlalchemy import delete
+
+        async with get_db() as db:
+            result = await db.execute(
+                select(Store).where(Store.shopify_domain == shop_domain)
+            )
+            store = result.scalar_one_or_none()
+
+            if store:
+                # Delete all related records (cascade should handle this, but be explicit)
+                await db.execute(
+                    delete(ChatInteraction).where(
+                        ChatInteraction.session_id.in_(
+                            select(ChatSession.id).where(ChatSession.merchant_id == store.id)
+                        )
+                    )
+                )
+                await db.execute(delete(SupportResolution).where(SupportResolution.merchant_id == store.id))
+                await db.execute(delete(AttributedSale).where(AttributedSale.merchant_id == store.id))
+                await db.execute(delete(ChatSession).where(ChatSession.merchant_id == store.id))
+                await db.delete(store)
+                logger.info(f"All data deleted for {shop_domain}")
+            else:
+                logger.info(f"No store found for {shop_domain} — nothing to delete")
+
+    except Exception as e:
+        logger.error(f"GDPR shop/redact failed for {shop_domain}: {e}", exc_info=True)
 
     return Response(status_code=200)
 

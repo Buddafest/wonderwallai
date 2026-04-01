@@ -24,3 +24,8 @@ uri = "https://sunsetbot-production.up.railway.app/shopify/webhooks"
 [[webhooks.subscriptions]]
 topics = ["app_subscriptions/activate", "app_subscriptions/cancelled", "app_subscriptions/approaching_capped_amount"]
 uri = "https://sunsetbot-production.up.railway.app/shopify/webhooks"
+
+[webhooks.privacy_compliance]
+customer_data_request_url = "https://sunsetbot-production.up.railway.app/shopify/gdpr/customers-data-request"
+customer_deletion_url = "https://sunsetbot-production.up.railway.app/shopify/gdpr/customers-redact"
+shop_deletion_url = "https://sunsetbot-production.up.railway.app/shopify/gdpr/shop-redact"

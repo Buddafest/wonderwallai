@@ -142,10 +142,10 @@ async def lifespan(app: FastAPI):
         product_intelligence = None
 
     try:
-        from app.services.billing_service import BillingService
-        billing_service = BillingService()
+        from app.services.billing_service import ShopifyBillingService
+        billing_service = ShopifyBillingService()
     except Exception as e:
-        logger.error(f"BillingService failed: {e}", exc_info=True)
+        logger.error(f"ShopifyBillingService failed: {e}", exc_info=True)
         billing_service = None
 
     try:

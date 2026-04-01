@@ -95,12 +95,14 @@ class AnalyticsService:
 
                 await db.commit()
 
-            # Fire-and-forget Stripe (safe after commit)
-            if self.billing_service and getattr(store, "stripe_subscription_id", None):
+            # Fire-and-forget Shopify usage billing (safe after commit)
+            if (
+                self.billing_service
+                and getattr(store, "shopify_subscription_id", None)
+                and getattr(store, "subscription_status", "none") in ("active", "trialing")
+            ):
                 asyncio.create_task(
-                    self.billing_service.report_resolution(
-                        store.stripe_subscription_id, store.jerry_plan
-                    )
+                    self._report_shopify_usage(store, resolution_type)
                 )
 
             logger.info(f"Resolution recorded | store={store_id} | type={resolution_type}")
@@ -138,13 +140,6 @@ class AnalyticsService:
                 db.add(sale)
                 await db.commit()
 
-            if self.billing_service and getattr(store, "stripe_subscription_id", None):
-                asyncio.create_task(
-                    self.billing_service.report_revenue_share(
-                        store.stripe_subscription_id, store.jerry_plan, order_cents
-                    )
-                )
-
             logger.info(
                 f"Sale attributed | shop={shop_domain} | order={shopify_order_id} | "
                 f"value=${order_value} | commission={commission}¢"
@@ -152,6 +147,26 @@ class AnalyticsService:
 
         except Exception as e:
             logger.error(f"Sale attribution failed: {e}", exc_info=True)
+
+    async def _report_shopify_usage(self, store, resolution_type: str) -> None:
+        """Report a $0.25 usage charge to Shopify for a resolved interaction."""
+        try:
+            usage_line_item_id = await self.billing_service.get_usage_line_item_id(
+                shop_domain=store.shopify_domain,
+                access_token=store.access_token,
+            )
+            if not usage_line_item_id:
+                logger.warning(f"No usage line item found for {store.shopify_domain} — skipping usage billing")
+                return
+
+            await self.billing_service.report_resolution(
+                shop_domain=store.shopify_domain,
+                access_token=store.access_token,
+                subscription_line_item_id=usage_line_item_id,
+                description=f"AI resolution: {resolution_type}",
+            )
+        except Exception as e:
+            logger.error(f"Shopify usage billing failed for {store.shopify_domain}: {e}")
 
     # Private helpers for cleanliness & reuse
     async def _get_store(self, db, store_id: str):
