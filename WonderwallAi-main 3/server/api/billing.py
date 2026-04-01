@@ -65,27 +65,7 @@ async def checkout(plan: str = "starter"):
         "cancel_url": "https://wonderwallai.skintlabs.ai/#pricing",
     }
 
-    settings = get_settings()
-    logger.info(f"Checkout discount check - coupon_id: {bool(settings.early_bird_coupon_id)}, "
-                f"billing_service: {_billing_service is not None}, "
-                f"configured: {_billing_service.configured if _billing_service else False}")
-
-    if settings.early_bird_coupon_id and _billing_service and _billing_service.configured:
-        try:
-            available = await _billing_service.is_early_bird_available()
-            logger.info(f"Early bird available: {available}")
-            if available:
-                checkout_kwargs["discounts"] = [{"coupon": settings.early_bird_coupon_id}]
-                logger.info(f"Applied coupon: {settings.early_bird_coupon_id}")
-            else:
-                checkout_kwargs["allow_promotion_codes"] = True
-                logger.info("Early bird not available, allowing manual promo codes")
-        except Exception as e:
-            logger.error(f"Exception checking early bird: {e}")
-            checkout_kwargs["allow_promotion_codes"] = True
-    else:
-        logger.warning("Coupon not applied - missing config")
-        checkout_kwargs["allow_promotion_codes"] = True
+    checkout_kwargs["allow_promotion_codes"] = True
 
     try:
         session = stripe_mod.checkout.Session.create(**checkout_kwargs)
