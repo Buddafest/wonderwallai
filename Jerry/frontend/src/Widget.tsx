@@ -18,6 +18,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 // Speech recognition type (varies by browser)
 type SpeechRecognitionType = typeof window extends { SpeechRecognition: infer T } ? T : any
 
+const EMOJI_RE = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -54,6 +56,8 @@ interface TokenResponse {
   store_name: string
   widget_color: string
   welcome_message: string | null
+  chat_language?: string
+  tts_enabled?: boolean
 }
 
 // ============================================================================
@@ -81,9 +85,9 @@ export function Widget({ shop, server, primaryColor, position, ttsDefault = fals
   const reconnectAttempts = useRef(0)
   const maxReconnectAttempts = 5
   const recognitionRef = useRef<any>(null)
-  const synthRef = useRef<SpeechSynthesis | null>(null)
   const ttsEnabledRef = useRef(ttsDefault)
-  const preferredVoiceRef = useRef<SpeechSynthesisVoice | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const tokenRef = useRef<string>('')
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -97,48 +101,20 @@ export function Widget({ shop, server, primaryColor, position, ttsDefault = fals
     }
   }, [isOpen])
 
-  // Detect speech API support on mount (check STT and TTS independently)
+  // Detect speech API support on mount
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition
       || (window as any).webkitSpeechRecognition
-    const synthAvailable = 'speechSynthesis' in window
     setSttSupported(!!SpeechRecognition)
-    setTtsSupported(synthAvailable)
-    if (synthAvailable) {
-      synthRef.current = window.speechSynthesis
-
-      // Pick the best English voice from a ranked preference list
-      const pickVoice = () => {
-        const voices = window.speechSynthesis.getVoices()
-        const preferred = [
-          'Google UK English Female',
-          'Google US English',
-          'Samantha',
-          'Karen',
-          'Daniel',
-          'Moira',
-          'Rishi',
-        ]
-        for (const name of preferred) {
-          const match = voices.find(v => v.name === name)
-          if (match) { preferredVoiceRef.current = match; return }
-        }
-        // Fallback: first English voice available
-        const english = voices.find(v => v.lang.startsWith('en'))
-        if (english) preferredVoiceRef.current = english
-      }
-
-      pickVoice()
-      // Chrome loads voices async — listen for the event
-      window.speechSynthesis.addEventListener('voiceschanged', pickVoice)
-    }
+    // TTS support is determined by backend (tts_enabled flag in token response)
+    // — set once token is fetched, in connect()
   }, [])
 
   // Cleanup voice on widget close
   useEffect(() => {
     if (!isOpen) {
       recognitionRef.current?.stop()
-      synthRef.current?.cancel()
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
       setIsRecording(false)
     }
   }, [isOpen])
@@ -167,6 +143,8 @@ export function Widget({ shop, server, primaryColor, position, ttsDefault = fals
           }
         } else {
           tokenDataRef.current = await resp.json()
+          tokenRef.current = tokenDataRef.current!.token
+          setTtsSupported(!!tokenDataRef.current!.tts_enabled)
         }
       } catch {
         // Fallback for local development
@@ -288,19 +266,28 @@ export function Widget({ shop, server, primaryColor, position, ttsDefault = fals
 
   // ─────────────── Voice Chat ───────────────
 
-  const speakText = useCallback((text: string) => {
-    if (!ttsEnabledRef.current || !synthRef.current) return
-    synthRef.current.cancel()
+  const speakText = useCallback(async (text: string) => {
+    if (!ttsEnabledRef.current || !tokenRef.current) return
+    // Stop any current playback
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
     // Strip emojis so they aren't read aloud
-    const clean = text.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').replace(/\s{2,}/g, ' ').trim()
+    const clean = text.replace(EMOJI_RE, '').replace(/\s{2,}/g, ' ').trim()
     if (!clean) return
-    const utterance = new SpeechSynthesisUtterance(clean)
-    if (preferredVoiceRef.current) utterance.voice = preferredVoiceRef.current
-    utterance.lang = 'en-US'
-    utterance.rate = 1.0
-    utterance.pitch = 1.0
-    synthRef.current.speak(utterance)
-  }, [])
+    try {
+      const res = await fetch(`${server}/tts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenRef.current}` },
+        body: JSON.stringify({ text: clean }),
+      })
+      if (!res.ok) return
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const audio = new Audio(url)
+      audioRef.current = audio
+      audio.onended = () => { URL.revokeObjectURL(url); audioRef.current = null }
+      audio.play()
+    } catch { /* TTS failure is non-critical */ }
+  }, [server])
 
   const toggleRecording = useCallback(() => {
     if (isRecording) {
@@ -318,10 +305,10 @@ export function Widget({ shop, server, primaryColor, position, ttsDefault = fals
     }
 
     // Stop any TTS playback before recording (prevent mic picking up bot speech)
-    synthRef.current?.cancel()
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
 
     const recognition = new SpeechRecognition()
-    recognition.lang = 'en-US'
+    recognition.lang = tokenDataRef.current?.chat_language || 'en-US'
     recognition.interimResults = false
     recognition.continuous = false
     recognition.maxAlternatives = 1
@@ -385,7 +372,7 @@ export function Widget({ shop, server, primaryColor, position, ttsDefault = fals
                     setTtsEnabled(prev => {
                       const next = !prev
                       ttsEnabledRef.current = next
-                      if (!next) synthRef.current?.cancel()
+                      if (!next && audioRef.current) { audioRef.current.pause(); audioRef.current = null }
                       return next
                     })
                   }}

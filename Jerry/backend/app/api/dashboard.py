@@ -7,6 +7,7 @@ import logging
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
 from sqlalchemy import select, func
 
 from app.db.engine import get_db
@@ -96,3 +97,47 @@ async def get_recent_chats(store_domain: str, limit: int = Query(default=20, le=
             for s in sessions
         ],
     }
+
+
+SUPPORTED_LANGUAGES = {
+    "en-US", "es-ES", "fr-FR", "de-DE", "it-IT", "pt-BR", "hi-IN", "th-TH",
+}
+
+
+class UpdateSettingsRequest(BaseModel):
+    chat_language: str = Field(..., max_length=10)
+
+
+@router.get("/{store_domain}/settings")
+async def get_settings(store_domain: str):
+    """Get store settings."""
+    async with get_db() as db:
+        result = await db.execute(
+            select(Store).where(Store.shopify_domain == store_domain)
+        )
+        store = result.scalar_one_or_none()
+
+    if not store:
+        raise HTTPException(status_code=404, detail="Store not found")
+
+    return {
+        "chat_language": getattr(store, "chat_language", "en-US") or "en-US",
+    }
+
+
+@router.post("/{store_domain}/settings")
+async def update_settings(store_domain: str, req: UpdateSettingsRequest):
+    """Update store settings."""
+    if req.chat_language not in SUPPORTED_LANGUAGES:
+        raise HTTPException(status_code=400, detail=f"Unsupported language. Choose from: {', '.join(sorted(SUPPORTED_LANGUAGES))}")
+
+    async with get_db() as db:
+        result = await db.execute(
+            select(Store).where(Store.shopify_domain == store_domain)
+        )
+        store = result.scalar_one_or_none()
+        if not store:
+            raise HTTPException(status_code=404, detail="Store not found")
+        store.chat_language = req.chat_language
+
+    return {"status": "updated", "chat_language": req.chat_language}

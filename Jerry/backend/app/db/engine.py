@@ -124,6 +124,8 @@ async def _migrate_add_missing_columns() -> None:
         # Shopify billing (added in App Store prep)
         ("stores", "shopify_subscription_id", "VARCHAR(255)"),
         ("stores", "shopify_plan", "VARCHAR(50)"),
+        # Language settings
+        ("stores", "chat_language", "VARCHAR(10) DEFAULT 'en-US'"),
         # ChatInteraction observability (added for intent logging)
         ("chat_interactions", "turn_number", "INTEGER DEFAULT 0"),
         ("chat_interactions", "latency_ms", "FLOAT"),

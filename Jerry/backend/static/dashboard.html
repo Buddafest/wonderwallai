@@ -87,6 +87,26 @@
 
         <div class="stats-grid" id="stats-grid"></div>
 
+        <div class="section" id="settings-section">
+            <h2>Settings</h2>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                <label for="lang-select" style="font-weight:600;color:var(--text-bright);">Voice Language</label>
+                <select id="lang-select" style="background:var(--bg);border:1px solid var(--border);border-radius:100px;padding:8px 16px;color:var(--text-bright);font-size:0.9rem;outline:none;cursor:pointer;">
+                    <option value="en-US">English</option>
+                    <option value="es-ES">Spanish</option>
+                    <option value="fr-FR">French</option>
+                    <option value="de-DE">German</option>
+                    <option value="it-IT">Italian</option>
+                    <option value="pt-BR">Portuguese</option>
+                    <option value="hi-IN">Hindi</option>
+                    <option value="th-TH">Thai</option>
+                </select>
+                <button id="save-lang-btn" onclick="saveLanguage()" style="background:var(--burnt-orange);color:var(--text-bright);border:none;border-radius:100px;padding:8px 20px;font-weight:600;cursor:pointer;font-size:0.85rem;">Save</button>
+                <span id="lang-status" style="font-size:0.8rem;color:var(--text-muted);"></span>
+                <div style="width:100%;font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Language applies to voice input &amp; output. Text chat works in many languages automatically.</div>
+            </div>
+        </div>
+
         <div class="section">
             <h2>Recent Conversations</h2>
             <table>
@@ -123,6 +143,7 @@
                 const chats = chatsRes.ok ? await chatsRes.json() : { chats: [] };
 
                 renderDashboard(stats, chats);
+                loadSettings(domain);
             } catch (e) {
                 document.getElementById('error').textContent = `Error: ${e.message}`;
                 document.getElementById('error').style.display = 'block';
@@ -162,6 +183,41 @@
                 </tr>
             `).join('');
             tbody.innerHTML = rows || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">No conversations yet</td></tr>';
+        }
+
+        async function loadSettings(domain) {
+            try {
+                const res = await fetch(`${API}/dashboard/${domain}/settings`);
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('lang-select').value = data.chat_language || 'en-US';
+                }
+            } catch {}
+        }
+
+        async function saveLanguage() {
+            const domain = document.getElementById('store-input').value.trim();
+            if (!domain) return;
+            const lang = document.getElementById('lang-select').value;
+            const statusEl = document.getElementById('lang-status');
+            try {
+                const res = await fetch(`${API}/dashboard/${domain}/settings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_language: lang }),
+                });
+                if (res.ok) {
+                    statusEl.textContent = 'Saved!';
+                    statusEl.style.color = '#66bb6a';
+                } else {
+                    statusEl.textContent = 'Failed to save';
+                    statusEl.style.color = 'var(--burnt-orange)';
+                }
+            } catch {
+                statusEl.textContent = 'Failed to save';
+                statusEl.style.color = 'var(--burnt-orange)';
+            }
+            setTimeout(() => { statusEl.textContent = ''; }, 3000);
         }
 
         // Auto-load if URL has ?store= param

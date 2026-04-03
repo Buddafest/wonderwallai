@@ -74,6 +74,11 @@ class Settings(BaseSettings):
     stripe_secret_key: str = Field(default="", alias="STRIPE_SECRET_KEY")
     stripe_webhook_secret: str = Field(default="", alias="STRIPE_WEBHOOK_SECRET")
 
+    # --- OpenAI (TTS) ---
+    openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
+    openai_tts_model: str = Field(default="tts-1", alias="OPENAI_TTS_MODEL")
+    openai_tts_voice: str = Field(default="onyx", alias="OPENAI_TTS_VOICE")
+
     # --- Admin ---
     admin_api_key: str = Field(default="dev-admin-key-change-me", alias="ADMIN_API_KEY")
 
@@ -131,6 +136,10 @@ class Settings(BaseSettings):
     @property
     def stripe_configured(self) -> bool:
         return bool(self.stripe_secret_key)
+
+    @property
+    def openai_configured(self) -> bool:
+        return bool(self.openai_api_key)
 
     @property
     def app_url(self) -> str:

@@ -99,6 +99,10 @@ class Store(Base):
         Text, nullable=True,
         comment="Custom welcome message (overrides default)",
     )
+    chat_language: Mapped[str] = mapped_column(
+        String(10), default="en-US",
+        comment="Language for voice input/output (e.g. en-US, es-ES)",
+    )
 
     # --- Billing ---
     stripe_customer_id: Mapped[Optional[str]] = mapped_column(
