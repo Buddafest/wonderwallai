@@ -292,7 +292,7 @@ async def shopify_billing_callback(
                 store.shopify_subscription_id = str(charge_id)
         logger.info(f"Shopify billing approved for {shop}, plan={plan}, charge_id={charge_id} → trialing")
         # Redirect to Jerry dashboard
-        return RedirectResponse(url=f"{settings.app_url}/dashboard?shop={shop}&billing=approved")
+        return RedirectResponse(url=f"{settings.app_url}/static/dashboard.html?store={shop}&billing=approved")
     else:
         # Merchant declined
         async with get_db() as db:
@@ -300,7 +300,7 @@ async def shopify_billing_callback(
             store = result.scalar_one()
             store.subscription_status = "cancelled"
         logger.warning(f"Shopify billing declined for {shop}")
-        return RedirectResponse(url=f"{settings.app_url}/dashboard?shop={shop}&billing=declined")
+        return RedirectResponse(url=f"{settings.app_url}/static/dashboard.html?store={shop}&billing=declined")
 
 
 @router.get("/usage/{store_domain}")

@@ -287,6 +287,9 @@ app.include_router(dashboard_router)
 from app.api.admin import router as admin_router
 app.include_router(admin_router)
 
+from app.api.tts import router as tts_router
+app.include_router(tts_router)
+
 # ---------------------------------------------------------------------------
 # Serve static files (widget JS bundle)
 # ---------------------------------------------------------------------------

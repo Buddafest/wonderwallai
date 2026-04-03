@@ -308,6 +308,8 @@ async def get_widget_token(
         "store_name": store.name,
         "widget_color": store.widget_color,
         "welcome_message": store.welcome_message,
+        "chat_language": getattr(store, "chat_language", "en-US") or "en-US",
+        "tts_enabled": get_settings().openai_configured,
     }
 
 
