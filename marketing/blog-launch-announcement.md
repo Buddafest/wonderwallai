@@ -18,7 +18,7 @@ I decided to build an AI assistant that could actually answer these questions by
 
 Jerry is an AI customer service platform built specifically for Shopify. When a store installs Jerry, it syncs their entire product catalog into a semantic search engine powered by vector embeddings. Customers can search in natural language  -  asking for "something warm for hiking under $80" returns real, in-stock products that match.
 
-But semantic product search was just the start. Jerry also connects to the Shopify Admin API for real-time order tracking, processes returns and refunds against the store's actual policies, speaks 50+ languages with built-in voice chat, and tracks revenue attribution so store owners can measure exactly what Jerry earns them.
+But semantic product search was just the start. Jerry also connects to the Shopify Admin API for real-time order tracking, processes returns and refunds against the store's actual policies, speaks 8 languages with built-in voice chat, and tracks revenue attribution so store owners can measure exactly what Jerry earns them.
 
 The technical stack is Python and FastAPI on the backend, React and TypeScript for the embeddable chat widget, Groq running Llama 3 for the AI engine, Pinecone for vector storage, and Stripe for billing. It runs on Railway and deploys automatically on every push to main.
 

@@ -19,7 +19,7 @@ I built something different. Jerry The Customer Service Bot is an AI assistant t
 
 **Built-in AI security.** Every conversation is protected by a 4-layer AI firewall (my other product, WonderwallAi). Nobody can jailbreak it, use it as a free coding assistant, or extract sensitive data. Within the first week of testing, someone tried to get the LLM to reveal API keys.
 
-**Voice chat and 50+ languages.** Uses the browser's built-in Web Speech API  -  no extra cost, no external service.
+**Voice chat and 8 languages.** Uses OpenAI TTS for voice output. Stores configure their language from the dashboard.
 
 **Full observability  -  not a black box.** This is the one I'm most proud of and I haven't seen any other Shopify chatbot do it. Jerry doesn't just log what it said  -  it logs WHY. Every intent classification comes with a confidence score and the matched reasoning. Every product recommendation includes the semantic similarity score. Every escalation logs the trigger and priority. Every LLM call records token counts and latency. You can query your logs and see every decision Jerry made, including decisions you weren't there for. When your AI assistant does something unexpected, you shouldn't have to guess why. You should be able to look it up.
 

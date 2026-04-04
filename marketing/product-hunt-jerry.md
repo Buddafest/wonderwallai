@@ -4,7 +4,7 @@
 AI customer service that actually knows your Shopify store
 
 ## Description (under 260 chars)
-Jerry is an AI customer service bot for Shopify. Syncs your catalog, tracks orders, handles returns, speaks 50+ languages  -  and logs every agent decision with full context so nothing is a black box. Protected by a 4-layer AI firewall. 7-day free trial.
+Jerry is an AI customer service bot for Shopify. Syncs your catalog, tracks orders, handles returns, speaks 8 languages with voice chat, and logs every agent decision with full context so nothing is a black box. Protected by a 4-layer AI firewall. 7-day free trial.
 
 ## Maker's Comment
 
@@ -30,7 +30,7 @@ I'm a solo founder, first-time builder. I made this because small Shopify stores
 
 - **Semantic Product Search**  -  Customers search in natural language ("red dress under $60"). Jerry understands price, size, colour, material, and occasion from your real catalog.
 - **Order Tracking & Returns**  -  Real-time order status, shipping estimates, and return processing directly through the Shopify Admin API.
-- **Voice Chat & 50+ Languages**  -  Built-in speech-to-text and text-to-speech. Automatic language detection. Zero extra cost.
+- **Voice Chat & 8 Languages**. Built-in speech-to-text and OpenAI text-to-speech. English, Spanish, French, German, Italian, Portuguese, Hindi, Thai.
 - **Revenue Attribution**  -  24-hour attribution window links conversations to purchases. Dashboard shows Jerry's exact revenue contribution.
 - **Full Agent Observability**  -  Every decision logged with reasoning, confidence scores, and latency. Intent classification, product recommendations, escalations, LLM calls  -  all auditable. Not a black box.
 - **AI Firewall Protection**  -  Every conversation protected by WonderwallAi's 4-layer pipeline: semantic routing, prompt injection detection, data leak prevention, and canary tokens.

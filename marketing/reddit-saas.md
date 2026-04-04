@@ -9,7 +9,7 @@ Six months ago I couldn't write a line of code. Today I'm launching two SaaS pro
 
 **The products:**
 
-**1. Jerry The Customer Service Bot** (jerry.skintlabs.ai)  -  An AI customer service assistant for Shopify stores. Not another chatbot wrapper that sends messages to GPT. Jerry connects to your actual Shopify store: it syncs your product catalog into a semantic search engine, pulls live order data for tracking, processes returns through your real policies, and speaks 50+ languages with built-in voice chat.
+**1. Jerry The Customer Service Bot** (jerry.skintlabs.ai)  -  An AI customer service assistant for Shopify stores. Not another chatbot wrapper that sends messages to GPT. Jerry connects to your actual Shopify store: it syncs your product catalog into a semantic search engine, pulls live order data for tracking, processes returns through your real policies, and speaks 8 languages with built-in voice chat.
 
 Pricing: $49/mo Base (500 conversations), $149/mo Growth, $499/mo Elite. 7-day free trial on all plans.
 
