@@ -10,10 +10,10 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [
-    { name = "WonderwallAi" },
+    { name = "Louis Constant", email = "louis.constant@skintlabs.ai" },
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -23,6 +23,12 @@ classifiers = [
     "Topic :: Security",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
+
+[project.urls]
+Homepage = "https://wonderwallai.skintlabs.ai"
+Repository = "https://github.com/SkintLabs/WonderwallAi"
+Documentation = "https://wonderwallai.skintlabs.ai"
+"Bug Tracker" = "https://github.com/SkintLabs/WonderwallAi/issues"
 dependencies = [
     "numpy>=1.24.0",
 ]

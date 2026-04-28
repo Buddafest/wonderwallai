@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WonderwallAi — AI Firewall for LLM Applications</title>
-    <meta name="description" content="Protect your LLM applications from prompt injection, data leaks, and off-topic abuse. Open-source Python SDK + hosted API. Under 2ms latency.">
+    <meta name="description" content="Protect your LLM applications from prompt injection, data leaks, and off-topic abuse. Open-source Python SDK + hosted API. Catches 90% of threats locally in under 2ms. Zero API calls on the fast path.">
     <meta property="og:title" content="WonderwallAi — AI Firewall for LLM Applications">
-    <meta property="og:description" content="Open-source AI firewall SDK. Prompt injection detection, PII filtering, canary tokens, semantic topic enforcement. Under 2ms latency.">
+    <meta property="og:description" content="Open-source AI firewall SDK. Prompt injection detection, PII filtering, canary tokens, semantic topic enforcement. Catches 90% of threats locally in under 2ms. Zero API calls on the fast path.">
     <meta property="og:image" content="https://wonderwallai.skintlabs.ai/og-image.png">
     <meta property="og:url" content="https://wonderwallai.skintlabs.ai">
     <meta property="og:type" content="website">
@@ -1143,7 +1143,7 @@ wall = Wonderwall(
         <div class="fade-in">
             <div class="faq-item">
                 <button class="faq-question">What is WonderwallAi?<span class="faq-icon">+</span></button>
-                <div class="faq-answer"><div class="faq-answer-inner">WonderwallAi is an open-source Python SDK that acts as a firewall for LLM applications. It scans user messages before they reach your LLM (blocking off-topic queries and prompt injection) and scans LLM responses before they reach users (redacting leaked API keys and PII). It works with any LLM provider and adds under 2ms latency on the fast path.</div></div>
+                <div class="faq-answer"><div class="faq-answer-inner">WonderwallAi is an open-source Python SDK that acts as a firewall for LLM applications. It scans user messages before they reach your LLM (blocking off-topic queries and prompt injection) and scans LLM responses before they reach users (redacting leaked API keys and PII). It works with any LLM provider. The semantic layer runs entirely in-process: no API calls, 90% of threats classified and blocked in under 2ms. When the optional LLM injection detector activates for deep scanning, the full pipeline still completes in under 300ms.</div></div>
             </div>
             <div class="faq-item">
                 <button class="faq-question">Do I need to send my data to your servers?<span class="faq-icon">+</span></button>
