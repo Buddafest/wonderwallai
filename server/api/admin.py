@@ -205,3 +205,47 @@ async def reactivate_api_key(key_prefix: str, request: Request):
         logger.info(f"Reactivated API key {key_prefix}")
 
     return {"reactivated": key_prefix, "is_active": True}
+
+
+class SetPlanRequest(BaseModel):
+    plan: str = Field(..., min_length=1, max_length=32)
+
+
+@router.patch("/keys/{key_prefix}/plan")
+async def set_api_key_plan(key_prefix: str, req: SetPlanRequest, request: Request):
+    """Set the plan tier on an existing key without touching Stripe.
+
+    Useful for demo accounts, comps, manual overrides, and internal testing.
+    Updates rate_limit to match the new plan. Stripe customer and subscription
+    fields are left untouched, so this does not create or modify a real
+    subscription.
+    """
+    await _verify_admin(request)
+
+    if req.plan not in PLAN_LIMITS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid plan. Allowed: {sorted(PLAN_LIMITS.keys())}",
+        )
+
+    async with get_db() as db:
+        result = await db.execute(
+            select(ApiKey).where(ApiKey.key_prefix == key_prefix)
+        )
+        key = result.scalar_one_or_none()
+        if not key:
+            raise HTTPException(status_code=404, detail="API key not found")
+
+        previous_plan = key.plan
+        key.plan = req.plan
+        key.rate_limit = PLAN_LIMITS[req.plan]
+        logger.info(
+            f"Plan override on {key_prefix}: {previous_plan} -> {req.plan}"
+        )
+
+    return {
+        "key_prefix": key_prefix,
+        "plan": req.plan,
+        "rate_limit": PLAN_LIMITS[req.plan],
+        "previous_plan": previous_plan,
+    }
