@@ -237,15 +237,27 @@ async def set_api_key_plan(key_prefix: str, req: SetPlanRequest, request: Reques
             raise HTTPException(status_code=404, detail="API key not found")
 
         previous_plan = key.plan
+        previous_status = key.billing_status
         key.plan = req.plan
         key.rate_limit = PLAN_LIMITS[req.plan]
+
+        # Reflect the override in billing_status so the dashboard does not
+        # block the key behind a payment-required banner. Real Stripe
+        # subscriptions still flow through the billing webhook normally.
+        if req.plan == "free":
+            key.billing_status = "none"
+        else:
+            key.billing_status = "active"
+
         logger.info(
-            f"Plan override on {key_prefix}: {previous_plan} -> {req.plan}"
+            f"Plan override on {key_prefix}: "
+            f"{previous_plan}/{previous_status} -> {req.plan}/{key.billing_status}"
         )
 
     return {
         "key_prefix": key_prefix,
         "plan": req.plan,
         "rate_limit": PLAN_LIMITS[req.plan],
+        "billing_status": key.billing_status,
         "previous_plan": previous_plan,
     }
