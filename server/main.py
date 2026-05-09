@@ -9,7 +9,7 @@ from server.config import get_settings
 from server.db.engine import init_db, close_db
 from server.middleware import RequestLoggingMiddleware, SecurityHeadersMiddleware
 from server.instance_cache import warm_shared_model
-from server.api import scan, admin, billing, canary, config, files, health, usage
+from server.api import scan, admin, billing, canary, config, demo, files, health, usage
 from server.helpers import set_billing_service
 from server.services.billing_service import BillingService
 
@@ -52,6 +52,7 @@ def create_app() -> FastAPI:
     app.include_router(billing.router)
     app.include_router(canary.router)
     app.include_router(config.router)
+    app.include_router(demo.router)
     app.include_router(files.router)
     app.include_router(health.router)
     app.include_router(usage.router)
