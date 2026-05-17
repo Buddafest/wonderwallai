@@ -330,11 +330,32 @@ async def probe_url(
 
     duration_ms = (time.perf_counter() - start) * 1000
     err_count = sum(1 for f in findings if f.error)
+    succeeded_count = sum(1 for f in findings if f.succeeded)
+
+    # Detect the "endpoint returned 200 OK with an HTML page" case (e.g. user
+    # pasted a marketing site or homepage). No transport errors fire, but the
+    # response is clearly a static page, not an AI. Without this, scanner would
+    # report a false 100/100 because every attack response was an HTML page
+    # that didn't trip any success detector.
+    def _looks_like_html(body: str) -> bool:
+        b = (body or "").lstrip()[:400].lower()
+        return (
+            b.startswith("<!doctype")
+            or b.startswith("<html")
+            or "<head" in b
+            or "<body" in b
+        )
+
+    html_count = sum(1 for f in findings if _looks_like_html(f.response_excerpt))
+    no_ai_signal = (
+        err_count >= max(1, len(findings) // 2)
+        or (html_count >= max(1, len(findings) // 2) and succeeded_count == 0)
+    )
 
     # Tier 2: if the cheap HTTP probe didn't find a chat endpoint, try the
     # headless service to interact with widget-based bots (Intercom, Crisp,
     # Drift, Tidio, Tawk.to, generic).
-    if err_count >= max(1, len(findings) // 2) and headless_enabled():
+    if no_ai_signal and headless_enabled():
         headless_findings = await _try_headless(target_url, attacks)
         if headless_findings is not None:
             succeeded = sum(1 for f in headless_findings if f.succeeded)
@@ -353,7 +374,7 @@ async def probe_url(
             )
 
     # Tier 3: site-recon fallback (security headers, exposed paths, leaks).
-    if err_count >= max(1, len(findings) // 2):
+    if no_ai_signal:
         recon = await _page_recon_findings(target_url)
         findings = recon
         succeeded = sum(1 for f in findings if f.succeeded)
