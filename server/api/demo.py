@@ -13,13 +13,18 @@ identical results UI from either entry point.
 """
 
 import logging
+import secrets
 import time
 from collections import defaultdict
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
+from sqlalchemy import delete, select
 
+from server.db.engine import get_db
+from server.db.models import SharedScan
 from server.services.prober import probe_system_prompt, probe_url
 
 logger = logging.getLogger("wonderwallai.demo")
@@ -84,6 +89,48 @@ def _check_demo_limit(request: Request, endpoint: str) -> None:
 
 
 # ============================================================
+# Share-link store (SQLite-backed, 7-day TTL)
+#
+# Each completed scan is given a short opaque id and persisted so it
+# can be retrieved by GET /v1/demo/scan/{id} after Railway restarts.
+# Expired rows are pruned lazily on read.
+# ============================================================
+
+_SHARE_TTL_DAYS = 7
+
+
+def _new_share_id() -> str:
+    return secrets.token_urlsafe(8)[:10]
+
+
+async def _store_scan(result_dict: dict) -> str:
+    sid = _new_share_id()
+    target = (result_dict.get("target") or "")[:2048]
+    score = int(result_dict.get("score") or 0)
+    async with get_db() as db:
+        # Resolve rare collision by retrying a fresh id
+        for _ in range(3):
+            existing = await db.execute(select(SharedScan.id).where(SharedScan.id == sid))
+            if existing.first() is None:
+                break
+            sid = _new_share_id()
+        db.add(SharedScan(id=sid, payload=result_dict, target=target, score=score))
+    return sid
+
+
+async def _load_scan(share_id: str) -> Optional[dict]:
+    cutoff = datetime.now(timezone.utc) - timedelta(days=_SHARE_TTL_DAYS)
+    async with get_db() as db:
+        # Lazy prune of expired rows (cheap, runs at most once per request)
+        await db.execute(delete(SharedScan).where(SharedScan.created_at < cutoff))
+        row = await db.execute(select(SharedScan).where(SharedScan.id == share_id))
+        scan = row.scalar_one_or_none()
+        if scan is None:
+            return None
+        return scan.payload
+
+
+# ============================================================
 # Request models
 # ============================================================
 
@@ -133,7 +180,9 @@ async def scan_prompt(req: ScanPromptRequest, request: Request):
         f"demo scan-prompt | ip={_client_ip(request)} | len={len(req.system_prompt)}"
     )
     result = probe_system_prompt(req.system_prompt)
-    return result.to_dict()
+    payload = result.to_dict()
+    payload["scan_id"] = await _store_scan(payload)
+    return payload
 
 
 @router.post("/scan-url")
@@ -158,4 +207,26 @@ async def scan_url(req: ScanUrlRequest, request: Request):
             status_code=500,
             detail="The scanner hit an unexpected error. Please try again or use the prompt tab instead.",
         )
-    return result.to_dict()
+    payload = result.to_dict()
+    payload["scan_id"] = await _store_scan(payload)
+    return payload
+
+
+@router.get("/scan/{share_id}")
+async def get_shared_scan(share_id: str):
+    """
+    Retrieve a previously-stored scan by share id. Public, no auth.
+
+    Returned payload is the same shape as scan-prompt/scan-url responses.
+    The frontend treats anonymous viewers as locked past the free findings
+    limit regardless of who originally ran the scan.
+    """
+    if not share_id or len(share_id) > 32:
+        raise HTTPException(status_code=400, detail="Invalid share id.")
+    payload = await _load_scan(share_id)
+    if payload is None:
+        raise HTTPException(
+            status_code=404,
+            detail="That scan link has expired or doesn't exist. Run a fresh scan to get a new link.",
+        )
+    return payload
