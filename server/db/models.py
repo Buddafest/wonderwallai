@@ -81,6 +81,20 @@ class FirewallConfig(Base):
     )
 
 
+class SharedScan(Base):
+    """Public demo scanner result, retrievable for ~7 days via /v1/demo/scan/{id}."""
+
+    __tablename__ = "shared_scans"
+
+    id: Mapped[str] = mapped_column(String(16), primary_key=True)
+    payload: Mapped[dict] = mapped_column(JSON, nullable=False)
+    target: Mapped[str] = mapped_column(String(2048), default="")
+    score: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), index=True
+    )
+
+
 class UsageRecord(Base):
     """Per-request usage tracking for metered billing."""
 
